@@ -6,7 +6,16 @@ import Card from "./Card";
 const meta = {
   title: "Decked/Card",
   component: Card,
-  tags: ["autodocs"]
+  tags: ["autodocs"],
+  argTypes: {
+    suit: {
+      options: ["hearts", "spades", "diamonds", "clubs"],
+      control: "select"
+    },
+    rank: {
+      control: { type: "number", min: 1, max: 13 }
+    }
+  }
 } satisfies Meta<typeof Card>;
 
 export default meta;
