@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { CSSProperties, FunctionComponent, useEffect, useState } from "react";
 import deckImage from "../../assets/Macrovector/deck.jpg";
 
 const positionMap = {
@@ -84,9 +84,10 @@ const positionMap = {
   }
 };
 
-const cardStyle = {
+const cardStyle: CSSProperties = {
   width: "128px",
   height: "180px",
+  position: "absolute",
   border: "1px solid",
   borderRadius: "16px",
   backgroundSize: "1480px auto",
@@ -97,18 +98,20 @@ const cardStyle = {
 interface Props {
   suit: "hearts" | "diamonds" | "spades" | "clubs";
   rank: "ace" | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | "jack" | "queen" | "king";
+  top?: string;
 }
 
-const Card: FunctionComponent<Props> = ({ suit, rank }) => {
+const Card: FunctionComponent<Props> = ({ suit, rank, top }) => {
   const [style, setStyle] = useState(cardStyle);
 
   useEffect(() => {
     setStyle({
       ...cardStyle,
       backgroundImage: `url(${deckImage})`,
-      backgroundPosition: `${positionMap[suit][rank].x}px ${positionMap[suit][rank].y}px`
+      backgroundPosition: `${positionMap[suit][rank].x}px ${positionMap[suit][rank].y}px`,
+      top
     });
-  }, [suit, rank]);
+  }, [suit, rank, top]);
 
   return <div style={style} role="img"></div>;
 };
