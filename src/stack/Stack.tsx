@@ -1,11 +1,11 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { CSSProperties, FunctionComponent, useEffect } from "react";
 import { useStoreActions, useStoreState } from "../model";
 import Card from "../card";
 
 interface Props {
   name: string;
   initialContents?: "fullDeck" | "empty";
-  spread: boolean;
+  spread?: boolean;
 }
 
 const fullDeck = [
@@ -63,9 +63,17 @@ const fullDeck = [
   { suit: "clubs", rank: "king" }
 ] satisfies ICard[];
 
+const emptyStackStyle: CSSProperties = {
+  width: "128px",
+  height: "180px",
+  border: "5px solid #b0b0b0",
+  borderRadius: "16px",
+  boxSizing: "border-box"
+};
+
 const SPREAD_FACTOR = 45;
 
-const Pile: FunctionComponent<Props> = ({ name, initialContents, spread }) => {
+const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false }) => {
   const cards = useStoreState((state) => state.cardPiles);
   const addPile = useStoreActions((state) => state.addPile);
   const cardsInPile = cards[name]?.cards;
@@ -89,11 +97,13 @@ const Pile: FunctionComponent<Props> = ({ name, initialContents, spread }) => {
             top={`${index * SPREAD_FACTOR}px`}
           />
         ))
-      ) : (
+      ) : topCard ? (
         <Card suit={topCard?.suit} rank={topCard?.rank} />
+      ) : (
+        <div style={emptyStackStyle} />
       )}
     </div>
   );
 };
 
-export default Pile;
+export default Stack;

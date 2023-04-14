@@ -2,13 +2,13 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { StoreProvider } from "easy-peasy";
 
-import Pile from "./Pile";
+import Stack from "./Stack";
 import { store } from "../model/storeModel";
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/react/writing-stories/introduction
 const meta = {
-  title: "Decked/Pile",
-  component: Pile,
+  title: "Decked/Stack",
+  component: Stack,
   tags: ["autodocs"],
   decorators: [
     (Story) => (
@@ -17,7 +17,7 @@ const meta = {
       </StoreProvider>
     )
   ]
-} satisfies Meta<typeof Pile>;
+} satisfies Meta<typeof Stack>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -28,5 +28,20 @@ export const FullDeck: Story = {
     name: "deck",
     spread: true,
     initialContents: "fullDeck"
+  }
+};
+
+export const NoSpread: Story = {
+  args: {
+    name: "noSpread",
+    spread: false,
+    initialContents: "fullDeck"
+  }
+};
+
+export const Empty: Story = {
+  args: {
+    name: "empty",
+    initialContents: "empty"
   }
 };
