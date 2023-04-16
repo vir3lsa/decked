@@ -27,9 +27,9 @@ export const WithCardStacks: Story = {
   args: {
     children: (
       <div style={parentStyle}>
-        <Stack name="stack2" spread={false} initialContents="fullDeck" />
-        <Stack name="stack3" spread={false} initialContents="empty" />
-        <Stack name="stack1" spread initialContents="fullDeck" />
+        <Stack name="notSpread" spread={false} initialContents="fullDeck" />
+        <Stack name="empty" spread={false} initialContents="empty" />
+        <Stack name="spread" spread initialContents="fullDeck" />
       </div>
     )
   }

@@ -22,9 +22,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // More on writing stories with args: https://storybook.js.org/docs/7.0/react/writing-stories/args
-export const Empty: Story = {
+export const AceOfSpades: Story = {
   args: {
+    id: "1",
     suit: "spades",
-    rank: "ace"
+    rank: 1
   }
 };

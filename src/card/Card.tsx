@@ -1,5 +1,7 @@
 import React, { CSSProperties, FunctionComponent, useEffect, useState } from "react";
+import { useDrag } from "react-dnd";
 import deckImage from "../../assets/Macrovector/deck.jpg";
+import ItemTypes from "../dnd";
 
 const positionMap = {
   hearts: {
@@ -96,13 +98,22 @@ const cardStyle: CSSProperties = {
 };
 
 interface Props {
+  id: string;
   suit: "hearts" | "diamonds" | "spades" | "clubs";
-  rank: "ace" | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | "jack" | "queen" | "king";
+  rank: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
   top?: string;
 }
 
-const Card: FunctionComponent<Props> = ({ suit, rank, top }) => {
+const Card: FunctionComponent<Props> = ({ id, suit, rank, top }) => {
   const [style, setStyle] = useState(cardStyle);
+
+  const [, dragRef] = useDrag(
+    () => ({
+      type: ItemTypes.CARD,
+      item: () => ({ id, suit, rank })
+    }),
+    [id, suit, rank]
+  );
 
   useEffect(() => {
     setStyle({
@@ -113,7 +124,7 @@ const Card: FunctionComponent<Props> = ({ suit, rank, top }) => {
     });
   }, [suit, rank, top]);
 
-  return <div style={style} role="img"></div>;
+  return <div style={style} role="img" ref={dragRef} />;
 };
 
 export default Card;

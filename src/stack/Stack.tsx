@@ -1,6 +1,9 @@
 import React, { CSSProperties, FunctionComponent, useEffect } from "react";
+import { v4 as uuid4 } from "uuid";
 import { useStoreActions, useStoreState } from "../model";
 import Card from "../card";
+import { useDrop } from "react-dnd";
+import ItemTypes from "../dnd";
 
 interface Props {
   name: string;
@@ -8,60 +11,19 @@ interface Props {
   spread?: boolean;
 }
 
-const fullDeck = [
-  { suit: "hearts", rank: "ace" },
-  { suit: "hearts", rank: 2 },
-  { suit: "hearts", rank: 3 },
-  { suit: "hearts", rank: 4 },
-  { suit: "hearts", rank: 5 },
-  { suit: "hearts", rank: 6 },
-  { suit: "hearts", rank: 7 },
-  { suit: "hearts", rank: 8 },
-  { suit: "hearts", rank: 9 },
-  { suit: "hearts", rank: 10 },
-  { suit: "hearts", rank: "jack" },
-  { suit: "hearts", rank: "queen" },
-  { suit: "hearts", rank: "king" },
-  { suit: "spades", rank: "ace" },
-  { suit: "spades", rank: 2 },
-  { suit: "spades", rank: 3 },
-  { suit: "spades", rank: 4 },
-  { suit: "spades", rank: 5 },
-  { suit: "spades", rank: 6 },
-  { suit: "spades", rank: 7 },
-  { suit: "spades", rank: 8 },
-  { suit: "spades", rank: 9 },
-  { suit: "spades", rank: 10 },
-  { suit: "spades", rank: "jack" },
-  { suit: "spades", rank: "queen" },
-  { suit: "spades", rank: "king" },
-  { suit: "diamonds", rank: "ace" },
-  { suit: "diamonds", rank: 2 },
-  { suit: "diamonds", rank: 3 },
-  { suit: "diamonds", rank: 4 },
-  { suit: "diamonds", rank: 5 },
-  { suit: "diamonds", rank: 6 },
-  { suit: "diamonds", rank: 7 },
-  { suit: "diamonds", rank: 8 },
-  { suit: "diamonds", rank: 9 },
-  { suit: "diamonds", rank: 10 },
-  { suit: "diamonds", rank: "jack" },
-  { suit: "diamonds", rank: "queen" },
-  { suit: "diamonds", rank: "king" },
-  { suit: "clubs", rank: "ace" },
-  { suit: "clubs", rank: 2 },
-  { suit: "clubs", rank: 3 },
-  { suit: "clubs", rank: 4 },
-  { suit: "clubs", rank: 5 },
-  { suit: "clubs", rank: 6 },
-  { suit: "clubs", rank: 7 },
-  { suit: "clubs", rank: 8 },
-  { suit: "clubs", rank: 9 },
-  { suit: "clubs", rank: 10 },
-  { suit: "clubs", rank: "jack" },
-  { suit: "clubs", rank: "queen" },
-  { suit: "clubs", rank: "king" }
-] satisfies ICard[];
+const suits: Suit[] = ["hearts", "spades", "diamonds", "clubs"];
+const ranks: Rank[] = Array.from(Array(13)).map((_, rank) => (rank + 1) as Rank);
+
+const createDeck = () => {
+  let deck: ICard[] = [];
+
+  suits.forEach((suit) => {
+    const suitCards = ranks.map((rank) => ({ suit, rank, id: uuid4() }));
+    deck = [...deck, ...suitCards];
+  });
+
+  return deck;
+};
 
 const emptyStackStyle: CSSProperties = {
   width: "128px",
@@ -74,31 +36,37 @@ const emptyStackStyle: CSSProperties = {
 const SPREAD_FACTOR = 45;
 
 const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false }) => {
-  const cards = useStoreState((state) => state.cardPiles);
-  const addPile = useStoreActions((state) => state.addPile);
-  const cardsInPile = cards[name]?.cards;
+  const cardsInPile = useStoreState(
+    (state) => state.cardStacks[name]?.cards,
+    (previous, next) => {
+      return previous === next;
+    }
+  );
+  const addStack = useStoreActions((state) => state.addStack);
+  const moveCard = useStoreActions((state) => state.moveCard);
+
   const topCard = cardsInPile?.[cardsInPile.length - 1];
 
   useEffect(() => {
     if (!cardsInPile) {
-      addPile({ name, cards: initialContents === "fullDeck" ? fullDeck : [] });
+      addStack({ name, cards: initialContents === "fullDeck" ? createDeck() : [] });
     }
     // Update model with initial contents
   }, [name, initialContents]);
 
+  const [, dropRef] = useDrop(() => ({
+    accept: ItemTypes.CARD,
+    drop: (card) => moveCard({ card: card as ICard, toStack: name })
+  }));
+
   return (
-    <div style={{ position: "relative" }}>
-      {spread ? (
-        cardsInPile?.map((card, index) => (
-          <Card
-            key={`${card.suit}-${card.rank}`}
-            suit={card.suit}
-            rank={card.rank}
-            top={`${index * SPREAD_FACTOR}px`}
-          />
+    <div style={{ position: "relative" }} ref={dropRef}>
+      {cardsInPile?.length && spread ? (
+        cardsInPile.map((card, index) => (
+          <Card key={card.id} id={card.id} suit={card.suit} rank={card.rank} top={`${index * SPREAD_FACTOR}px`} />
         ))
       ) : topCard ? (
-        <Card suit={topCard?.suit} rank={topCard?.rank} />
+        <Card id={topCard.id} suit={topCard.suit} rank={topCard.rank} />
       ) : (
         <div style={emptyStackStyle} />
       )}
