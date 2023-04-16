@@ -12,6 +12,10 @@ interface IStack {
   cards: ICard[];
 }
 
+interface CardStacks {
+  [name: string]: IStack;
+}
+
 interface MoveCardPayload {
   card: ICard;
   toStack: string;

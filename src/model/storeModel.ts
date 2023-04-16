@@ -1,15 +1,16 @@
 import { action, Action, createStore, createTypedHooks } from "easy-peasy";
 
-interface StoreModel {
-  cardStacks: {
-    [name: string]: IStack;
-  };
+export interface StoreModel {
+  cardStacks: CardStacks;
+  setupHasRun: boolean;
   addStack: Action<StoreModel, IStack>;
   moveCard: Action<StoreModel, MoveCardPayload>;
+  setSetupHasRun: Action<StoreModel, boolean>;
 }
 
 export const store = createStore<StoreModel>({
   cardStacks: {},
+  setupHasRun: false,
   addStack: action((state, stack) => {
     state.cardStacks[stack.name] = stack;
   }),
@@ -27,7 +28,7 @@ export const store = createStore<StoreModel>({
 
     // Remove the card from the old stack
     if (fromStack && fromIndex !== undefined) {
-      fromStack.cards.splice(fromIndex);
+      fromStack.cards.splice(fromIndex, 1);
     } else {
       throw Error(
         `Couldn't find card: { id: ${payload.card.id}, suit: ${payload.card.suit}, rank: ${payload.card.rank} }`
@@ -36,6 +37,9 @@ export const store = createStore<StoreModel>({
 
     // Add the card to the new stack
     state.cardStacks[payload.toStack].cards.push(payload.card);
+  }),
+  setSetupHasRun: action((state, setupHasRun) => {
+    state.setupHasRun = setupHasRun;
   })
 });
 

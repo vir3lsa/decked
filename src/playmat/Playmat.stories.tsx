@@ -34,3 +34,51 @@ export const WithCardStacks: Story = {
     )
   }
 };
+
+export const SetupFunction: Story = {
+  args: {
+    children: (
+      <div style={parentStyle}>
+        <Stack name="a" spread={false} initialContents="fullDeck" />
+        <Stack name="b" spread={false} initialContents="empty" />
+        <Stack name="c" spread initialContents="empty" />
+        <Stack name="d" spread initialContents="empty" />
+      </div>
+    ),
+    setup: (cardStacks, moveCard) => {
+      const deck = cardStacks["a"].cards;
+      const indices = Array.from(Array(52)).map((_, index) => index);
+      console.log(indices);
+      console.log(deck);
+      const shuffledDeck = Array.from(Array(52));
+
+      deck.forEach((card) => {
+        const index = indices[Math.floor(Math.random() * indices.length)];
+        console.log(index);
+        shuffledDeck[index] = card;
+        indices.splice(indices.indexOf(index), 1);
+        console.log(indices);
+      });
+      console.log(JSON.stringify(shuffledDeck, null, 2));
+
+      let toStack = "a";
+      shuffledDeck.forEach((card) => {
+        moveCard({ card, toStack });
+        switch (toStack) {
+          case "a":
+            toStack = "b";
+            break;
+          case "b":
+            toStack = "c";
+            break;
+          case "c":
+            toStack = "d";
+            break;
+          case "d":
+            toStack = "a";
+            break;
+        }
+      });
+    }
+  }
+};
