@@ -82,3 +82,23 @@ export const SetupFunction: Story = {
     }
   }
 };
+
+export const CanDrag: Story = {
+  args: {
+    children: (
+      <div style={parentStyle}>
+        <Stack name="notSpread" spread={false} initialContents="fullDeck" />
+        <Stack name="empty" spread={false} initialContents="empty" />
+        <Stack
+          name="spread"
+          spread
+          initialContents="fullDeck"
+          canDrag={(cardStacks, stackName, card) =>
+            cardStacks[stackName].cards.findIndex((cardInStack) => cardInStack.id === card.id) ===
+            cardStacks[stackName].cards.length - 1
+          }
+        />
+      </div>
+    )
+  }
+};

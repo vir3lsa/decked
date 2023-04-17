@@ -102,15 +102,18 @@ interface Props {
   suit: "hearts" | "diamonds" | "spades" | "clubs";
   rank: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
   top?: string;
+  canDrag?: (card: ICard) => boolean;
 }
 
-const Card: FunctionComponent<Props> = ({ id, suit, rank, top }) => {
+const Card: FunctionComponent<Props> = ({ id, suit, rank, top, canDrag }) => {
   const [style, setStyle] = useState(cardStyle);
+  const card = { id, suit, rank };
 
   const [, dragRef] = useDrag(
     () => ({
       type: ItemTypes.CARD,
-      item: () => ({ id, suit, rank })
+      item: () => card,
+      canDrag: () => (canDrag ? canDrag(card) : true)
     }),
     [id, suit, rank]
   );

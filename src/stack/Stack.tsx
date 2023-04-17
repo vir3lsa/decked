@@ -9,6 +9,7 @@ interface Props {
   name: string;
   initialContents?: "fullDeck" | "empty";
   spread?: boolean;
+  canDrag?: (cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
 }
 
 const suits: Suit[] = ["hearts", "spades", "diamonds", "clubs"];
@@ -35,8 +36,9 @@ const emptyStackStyle: CSSProperties = {
 
 const SPREAD_FACTOR = 45;
 
-const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false }) => {
-  const cardsInPile = useStoreState(
+const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false, canDrag }) => {
+  const cardStacks = useStoreState((state) => state.cardStacks);
+  const cardsInStack = useStoreState(
     (state) => state.cardStacks[name]?.cards,
     (previous, next) => {
       return previous === next;
@@ -45,10 +47,10 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
   const addStack = useStoreActions((state) => state.addStack);
   const moveCard = useStoreActions((state) => state.moveCard);
 
-  const topCard = cardsInPile?.[cardsInPile.length - 1];
+  const topCard = cardsInStack?.[cardsInStack.length - 1];
 
   useEffect(() => {
-    if (!cardsInPile) {
+    if (!cardsInStack) {
       addStack({ name, cards: initialContents === "fullDeck" ? createDeck() : [] });
     }
     // Update model with initial contents
@@ -61,12 +63,24 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
 
   return (
     <div style={{ position: "relative" }} ref={dropRef}>
-      {cardsInPile?.length && spread ? (
-        cardsInPile.map((card, index) => (
-          <Card key={card.id} id={card.id} suit={card.suit} rank={card.rank} top={`${index * SPREAD_FACTOR}px`} />
+      {cardsInStack?.length && spread ? (
+        cardsInStack.map((card, index) => (
+          <Card
+            key={card.id}
+            id={card.id}
+            suit={card.suit}
+            rank={card.rank}
+            top={`${index * SPREAD_FACTOR}px`}
+            canDrag={(card) => (canDrag ? canDrag(cardStacks, name, card) : true)}
+          />
         ))
       ) : topCard ? (
-        <Card id={topCard.id} suit={topCard.suit} rank={topCard.rank} />
+        <Card
+          id={topCard.id}
+          suit={topCard.suit}
+          rank={topCard.rank}
+          canDrag={(card) => (canDrag ? canDrag(cardStacks, name, card) : true)}
+        />
       ) : (
         <div style={emptyStackStyle} />
       )}
