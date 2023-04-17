@@ -102,3 +102,25 @@ export const CanDrag: Story = {
     )
   }
 };
+
+export const CanDrop: Story = {
+  args: {
+    children: (
+      <div style={parentStyle}>
+        <Stack
+          name="notSpread"
+          spread={false}
+          initialContents="fullDeck"
+          canDrop={(cardStacks, stackName) => cardStacks[stackName].cards.length <= 10}
+        />
+        <Stack
+          name="empty"
+          spread={false}
+          initialContents="empty"
+          canDrop={(_, __, card) => card.suit === "hearts" || card.suit === "diamonds"}
+        />
+        <Stack name="spread" spread initialContents="fullDeck" canDrop={(_, __, card) => card.rank > 3} />
+      </div>
+    )
+  }
+};

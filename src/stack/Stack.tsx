@@ -10,6 +10,7 @@ interface Props {
   initialContents?: "fullDeck" | "empty";
   spread?: boolean;
   canDrag?: (cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
+  canDrop?: (cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
 }
 
 const suits: Suit[] = ["hearts", "spades", "diamonds", "clubs"];
@@ -36,14 +37,9 @@ const emptyStackStyle: CSSProperties = {
 
 const SPREAD_FACTOR = 45;
 
-const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false, canDrag }) => {
+const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false, canDrag, canDrop }) => {
   const cardStacks = useStoreState((state) => state.cardStacks);
-  const cardsInStack = useStoreState(
-    (state) => state.cardStacks[name]?.cards,
-    (previous, next) => {
-      return previous === next;
-    }
-  );
+  const cardsInStack = useStoreState((state) => state.cardStacks[name]?.cards);
   const addStack = useStoreActions((state) => state.addStack);
   const moveCard = useStoreActions((state) => state.moveCard);
 
@@ -58,7 +54,8 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
 
   const [, dropRef] = useDrop(() => ({
     accept: ItemTypes.CARD,
-    drop: (card) => moveCard({ card: card as ICard, toStack: name })
+    drop: (card) => moveCard({ card: card as ICard, toStack: name }),
+    canDrop: (card) => (canDrop ? canDrop(cardStacks, name, card as ICard) : true)
   }));
 
   return (
