@@ -6,7 +6,10 @@
   "scripts": {
     "test": "jest",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build": "tsc",
+    "build-storybook": "storybook build",
+    "build:emscell": "webpack --config 'games/emscell/webpack.config.js'",
+    "start:emscell": "http-server games/emscell/dist/"
   },
   "keywords": [
     "cards",
@@ -26,17 +29,24 @@
     "@storybook/react": "^7.0.2",
     "@storybook/react-webpack5": "^7.0.2",
     "@storybook/testing-library": "^0.0.14-next.2",
+    "@types/react-dom": "^18.0.11",
     "@types/uuid": "^9.0.1",
+    "babel-loader": "^9.1.2",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.1",
+    "http-server": "^14.1.1",
     "prop-types": "^15.8.1",
-    "react-dom": "^18.2.0",
-    "typescript": "^5.0.4"
+    "storybook": "^7.0.2",
+    "typescript": "^5.0.4",
+    "webpack": "^5.80.0",
+    "webpack-cli": "^5.0.2"
   },
   "dependencies": {
     "easy-peasy": "^5.2.0",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
-    "storybook": "^7.0.2",
+    "react-dom": "^18.2.0",
     "uuid": "^9.0.0"
   }
 }

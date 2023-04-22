@@ -20,3 +20,13 @@ interface MoveCardPayload {
   card: ICard;
   toStack: string;
 }
+
+type IsWin = (cardStacks: CardStacks) => boolean;
+
+interface Move {
+  cards: string[];
+  fromStack: string;
+  toStack: string;
+  fromIndex: number;
+  toIndex: number;
+}

@@ -48,18 +48,13 @@ export const SetupFunction: Story = {
     setup: (cardStacks, moveCard) => {
       const deck = cardStacks["a"].cards;
       const indices = Array.from(Array(52)).map((_, index) => index);
-      console.log(indices);
-      console.log(deck);
       const shuffledDeck = Array.from(Array(52));
 
       deck.forEach((card) => {
         const index = indices[Math.floor(Math.random() * indices.length)];
-        console.log(index);
         shuffledDeck[index] = card;
         indices.splice(indices.indexOf(index), 1);
-        console.log(indices);
       });
-      console.log(JSON.stringify(shuffledDeck, null, 2));
 
       let toStack = "a";
       shuffledDeck.forEach((card) => {
@@ -122,5 +117,23 @@ export const CanDrop: Story = {
         <Stack name="spread" spread initialContents="fullDeck" canDrop={(_, __, card) => card.rank > 3} />
       </div>
     )
+  }
+};
+
+export const WinFunction: Story = {
+  args: {
+    children: (
+      <div style={parentStyle}>
+        <Stack name="aa" spread={false} initialContents="fullDeck" />
+        <Stack name="bb" spread={false} initialContents="empty" />
+        <Stack name="cc" spread initialContents="empty" />
+        <Stack name="dd" spread initialContents="empty" />
+      </div>
+    ),
+    isWin: (cardStacks) =>
+      cardStacks["aa"].cards.length > 0 &&
+      cardStacks["bb"].cards.length > 0 &&
+      cardStacks["cc"].cards.length > 0 &&
+      cardStacks["dd"].cards.length > 0
   }
 };

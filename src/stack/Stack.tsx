@@ -52,11 +52,16 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
     // Update model with initial contents
   }, [name, initialContents]);
 
-  const [, dropRef] = useDrop(() => ({
-    accept: ItemTypes.CARD,
-    drop: (card) => moveCard({ card: card as ICard, toStack: name }),
-    canDrop: (card) => (canDrop ? canDrop(cardStacks, name, card as ICard) : true)
-  }));
+  const [, dropRef] = useDrop(
+    () => ({
+      accept: ItemTypes.CARD,
+      drop: (card) => moveCard({ card: card as ICard, toStack: name }),
+      canDrop: (card) => {
+        return canDrop ? canDrop(cardStacks, name, card as ICard) : true;
+      }
+    }),
+    [name, canDrop, cardStacks]
+  );
 
   return (
     <div style={{ position: "relative" }} ref={dropRef}>
@@ -68,7 +73,9 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
             suit={card.suit}
             rank={card.rank}
             top={`${index * SPREAD_FACTOR}px`}
-            canDrag={(card) => (canDrag ? canDrag(cardStacks, name, card) : true)}
+            canDrag={(card) => {
+              return canDrag ? canDrag(cardStacks, name, card) : true;
+            }}
           />
         ))
       ) : topCard ? (

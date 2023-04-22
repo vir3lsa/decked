@@ -115,7 +115,7 @@ const Card: FunctionComponent<Props> = ({ id, suit, rank, top, canDrag }) => {
       item: () => card,
       canDrag: () => (canDrag ? canDrag(card) : true)
     }),
-    [id, suit, rank]
+    [id, suit, rank, canDrag]
   );
 
   useEffect(() => {
