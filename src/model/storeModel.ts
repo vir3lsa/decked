@@ -62,14 +62,16 @@ export const store = createStore<StoreModel>({
       state.win = true;
     }
 
-    // Record the move
-    state.history.push({
-      cards: [payload.card.id],
-      fromStack: fromStack.name,
-      toStack: payload.toStack,
-      fromIndex,
-      toIndex: state.cardStacks[payload.toStack].cards.length - 1
-    });
+    if (state.setupHasRun) {
+      // Record the move
+      state.history.push({
+        cards: [payload.card.id],
+        fromStack: fromStack.name,
+        toStack: payload.toStack,
+        fromIndex,
+        toIndex: state.cardStacks[payload.toStack].cards.length - 1
+      });
+    }
   }),
   setSetupHasRun: action((state, setupHasRun) => {
     state.setupHasRun = setupHasRun;

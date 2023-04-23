@@ -1,5 +1,10 @@
 # Decked Change Log
 
-# Unreleased
+# 0.0.2
 
-* 2023-04-09 Created project
+* 2023-04-23 Added undo functionality.
+
+# 0.0.1
+
+* 2023-04-22 Initial version released.
+* 2023-04-09 Created project.

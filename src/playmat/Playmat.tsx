@@ -21,6 +21,18 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, children }) => {
   const moveCard = useStoreActions((store) => store.moveCard);
   const setSetupHasRun = useStoreActions((store) => store.setSetupHasRun);
   const setIsWin = useStoreActions((store) => store.setIsWin);
+  const undo = useStoreActions((store) => store.undo);
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => {
+      if (event.key === "z" || event.key === "u") {
+        undo();
+      }
+    };
+
+    document.addEventListener("keypress", listener);
+    return () => document.removeEventListener("keypress", listener);
+  }, []);
 
   useEffect(() => {
     if (!storeIsWin && isWin) {
