@@ -1,8 +1,12 @@
 # Decked Change Log
 
+# Unreleased
+
+* 2023-04-23 Improved click-to-move preferential ordering.
+
 # 0.0.3
 
-* 2023-04-23 Added click-to-move functionality
+* 2023-04-23 Added click-to-move functionality.
 
 # 0.0.2
 

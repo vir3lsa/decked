@@ -126,16 +126,26 @@ export const store = createStore<StoreModel>({
       return;
     }
 
-    const chosenStack =
-      availableStacks.find(
-        (stack) =>
-          !state.preferredMoveStacks.length ||
-          state.preferredMoveStacks.find((preferredStack) => preferredStack === stack.name)
-      ) || availableStacks[0];
+    let bestStack, bestStackIndex: number;
+
+    // Find the best available stack, according to preference.
+    if (state.preferredMoveStacks.length) {
+      availableStacks.forEach((stack) => {
+        const orderOfPreference = state.preferredMoveStacks.indexOf(stack.name) + 1;
+        if (orderOfPreference && (!bestStackIndex || orderOfPreference < bestStackIndex)) {
+          bestStack = stack;
+          bestStackIndex = orderOfPreference;
+        }
+      });
+    }
+
+    if (!bestStack) {
+      bestStack = availableStacks[0];
+    }
 
     actions.moveCard({
       card,
-      toStack: chosenStack.name
+      toStack: bestStack.name
     });
   }),
   setPreferredMoveStacks: action((state, stacks) => {
