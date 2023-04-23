@@ -7,12 +7,13 @@ interface ICard {
   rank: Rank;
 }
 
-type CanDrop = (cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
+type CanDragOrDropFunc = (cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
+type CanDragOrDrop = boolean | CanDragOrDropFunc;
 
 interface IStack {
   name: string;
   cards: ICard[];
-  canDrop?: CanDrop;
+  canDrop?: CanDragOrDropFunc;
 }
 
 interface CardStacks {

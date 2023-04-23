@@ -9,8 +9,8 @@ interface Props {
   name: string;
   initialContents?: "fullDeck" | "empty";
   spread?: boolean;
-  canDrag?: CanDrop;
-  canDrop?: CanDrop;
+  canDrag?: CanDragOrDrop;
+  canDrop?: CanDragOrDrop;
 }
 
 const suits: Suit[] = ["hearts", "spades", "diamonds", "clubs"];
@@ -37,17 +37,19 @@ const emptyStackStyle: CSSProperties = {
 
 const SPREAD_FACTOR = 45;
 
-const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false, canDrag, canDrop }) => {
+const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false, canDrag = true, canDrop = true }) => {
   const cardStacks = useStoreState((state) => state.cardStacks);
   const cardsInStack = useStoreState((state) => state.cardStacks[name]?.cards);
   const addStack = useStoreActions((state) => state.addStack);
   const moveCard = useStoreActions((state) => state.moveCard);
+  const canDragFunc = typeof canDrag === "function" ? canDrag : () => canDrag;
+  const canDropFunc = typeof canDrop === "function" ? canDrop : () => canDrop;
 
   const topCard = cardsInStack?.[cardsInStack.length - 1];
 
   useEffect(() => {
     if (!cardsInStack) {
-      addStack({ name, cards: initialContents === "fullDeck" ? createDeck() : [], canDrop });
+      addStack({ name, cards: initialContents === "fullDeck" ? createDeck() : [], canDrop: canDropFunc });
     }
     // Update model with initial contents
   }, [name, initialContents]);
@@ -57,7 +59,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
       accept: ItemTypes.CARD,
       drop: (card) => moveCard({ card: card as ICard, toStack: name }),
       canDrop: (card) => {
-        return canDrop ? canDrop(cardStacks, name, card as ICard) : true;
+        return canDrop ? canDropFunc(cardStacks, name, card as ICard) : true;
       }
     }),
     [name, canDrop, cardStacks]
@@ -74,7 +76,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
             rank={card.rank}
             top={`${index * SPREAD_FACTOR}px`}
             canDrag={(card) => {
-              return canDrag ? canDrag(cardStacks, name, card) : true;
+              return canDrag ? canDragFunc(cardStacks, name, card) : true;
             }}
           />
         ))
@@ -83,7 +85,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
           id={topCard.id}
           suit={topCard.suit}
           rank={topCard.rank}
-          canDrag={(card) => (canDrag ? canDrag(cardStacks, name, card) : true)}
+          canDrag={(card) => (canDrag ? canDragFunc(cardStacks, name, card) : true)}
         />
       ) : (
         <div style={emptyStackStyle} />

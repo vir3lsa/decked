@@ -20,7 +20,7 @@ export const Empty: Story = {};
 const parentStyle = {
   display: "grid",
   gridTemplateColumns: "250px 250px",
-  gridTemplateRows: "250px 250px"
+  gridTemplateRows: "250px 250px 250px"
 };
 
 export const WithCardStacks: Story = {
@@ -135,5 +135,24 @@ export const WinFunction: Story = {
       cardStacks["bb"].cards.length > 0 &&
       cardStacks["cc"].cards.length > 0 &&
       cardStacks["dd"].cards.length > 0
+  }
+};
+
+const canDrop = (cardStacks: CardStacks, name: string) => cardStacks[name].cards.length < 1;
+
+export const preferredMoveStacks: Story = {
+  args: {
+    children: (
+      <div style={parentStyle}>
+        <Stack name="aaa" spread={false} canDrop={canDrop} initialContents="fullDeck" />
+        <Stack name="bbb" spread={false} canDrop={canDrop} initialContents="empty" />
+        <Stack name="ccc" spread={false} canDrop={canDrop} initialContents="empty" />
+        <Stack name="ddd" spread={false} canDrop={canDrop} initialContents="empty" />
+        <Stack name="eee" spread={false} canDrop={canDrop} initialContents="empty" />
+        <Stack name="fff" spread={false} canDrop={canDrop} initialContents="empty" />
+        <Stack name="ggg" spread={false} canDrop={canDrop} initialContents="empty" />
+      </div>
+    ),
+    preferredMoveStacks: ["eee", "bbb", "ggg", "ddd", "ccc", "fff"]
   }
 };
