@@ -1,4 +1,4 @@
-import { action, Action, createStore, createTypedHooks } from "easy-peasy";
+import { action, Action, createStore, createTypedHooks, thunk, Thunk } from "easy-peasy";
 
 export interface StoreModel {
   cardStacks: CardStacks;
@@ -6,11 +6,14 @@ export interface StoreModel {
   isWin?: IsWin;
   win: boolean;
   history: Move[];
+  preferredMoveStacks: string[];
   addStack: Action<StoreModel, IStack>;
   moveCard: Action<StoreModel, MoveCardPayload>;
   setSetupHasRun: Action<StoreModel, boolean>;
   setIsWin: Action<StoreModel, IsWin>;
   undo: Action<StoreModel>;
+  clickMove: Thunk<StoreModel, ICard>;
+  setPreferredMoveStacks: Action<StoreModel, string[]>;
 }
 
 const findCard = (cardId: string, cardStacks: CardStacks): ICard => {
@@ -25,25 +28,37 @@ const findCard = (cardId: string, cardStacks: CardStacks): ICard => {
   throw Error(`Couldn't find card with ID: ${cardId}`);
 };
 
+const findStack = (cardStacks: CardStacks, cardId: string): [IStack | undefined, number | undefined] => {
+  let fromStack: IStack | undefined, fromIndex: number | undefined;
+  Object.values(cardStacks).forEach((stack) => {
+    if (fromStack) {
+      // Short-circuit if we've already found the stack.
+      return;
+    }
+
+    const indexOfCard = stack.cards.findIndex((card) => card.id === cardId);
+
+    if (indexOfCard > -1) {
+      fromStack = stack;
+      fromIndex = indexOfCard;
+    }
+  });
+
+  return [fromStack, fromIndex];
+};
+
 export const store = createStore<StoreModel>({
   cardStacks: {},
   setupHasRun: false,
   win: false,
   history: [],
+  preferredMoveStacks: [],
   addStack: action((state, stack) => {
     state.cardStacks[stack.name] = stack;
   }),
   moveCard: action((state, payload) => {
     // Find the card in the old stack
-    let fromStack: IStack | undefined, fromIndex: number | undefined;
-    Object.values(state.cardStacks).forEach((stack) => {
-      const indexOfCard = stack.cards.findIndex((card) => card.id === payload.card.id);
-
-      if (indexOfCard > -1) {
-        fromStack = stack;
-        fromIndex = indexOfCard;
-      }
-    });
+    let [fromStack, fromIndex] = findStack(state.cardStacks, payload.card.id);
 
     // Remove the card from the old stack
     if (fromStack && fromIndex !== undefined) {
@@ -96,6 +111,35 @@ export const store = createStore<StoreModel>({
         throw Error("Couldn't undo: couldn't find cards or fromStack or toStack");
       }
     }
+  }),
+  clickMove: thunk((actions, card, helpers) => {
+    const state = helpers.getState();
+    const [currentStack] = findStack(state.cardStacks, card.id);
+    const availableStacks = Object.values(state.cardStacks).filter((stack) => {
+      return (
+        stack.name !== currentStack?.name && (stack.canDrop ? stack.canDrop(state.cardStacks, stack.name, card) : true)
+      );
+    });
+
+    if (!availableStacks.length) {
+      // No stacks we can move to, so stop.
+      return;
+    }
+
+    const chosenStack =
+      availableStacks.find(
+        (stack) =>
+          !state.preferredMoveStacks.length ||
+          state.preferredMoveStacks.find((preferredStack) => preferredStack === stack.name)
+      ) || availableStacks[0];
+
+    actions.moveCard({
+      card,
+      toStack: chosenStack.name
+    });
+  }),
+  setPreferredMoveStacks: action((state, stacks) => {
+    state.preferredMoveStacks = stacks;
   })
 });
 

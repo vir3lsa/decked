@@ -4,6 +4,8 @@ import { StoreProvider } from "easy-peasy";
 
 import Stack from "./Stack";
 import { store } from "../model/storeModel";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/react/writing-stories/introduction
 const meta = {
@@ -13,7 +15,9 @@ const meta = {
   decorators: [
     (Story) => (
       <StoreProvider store={store}>
-        <Story />
+        <DndProvider backend={HTML5Backend}>
+          <Story />
+        </DndProvider>
       </StoreProvider>
     )
   ]

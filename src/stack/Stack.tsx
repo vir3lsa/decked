@@ -9,8 +9,8 @@ interface Props {
   name: string;
   initialContents?: "fullDeck" | "empty";
   spread?: boolean;
-  canDrag?: (cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
-  canDrop?: (cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
+  canDrag?: CanDrop;
+  canDrop?: CanDrop;
 }
 
 const suits: Suit[] = ["hearts", "spades", "diamonds", "clubs"];
@@ -47,7 +47,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
 
   useEffect(() => {
     if (!cardsInStack) {
-      addStack({ name, cards: initialContents === "fullDeck" ? createDeck() : [] });
+      addStack({ name, cards: initialContents === "fullDeck" ? createDeck() : [], canDrop });
     }
     // Update model with initial contents
   }, [name, initialContents]);

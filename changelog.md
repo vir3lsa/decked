@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# 0.0.3
+
+* 2023-04-23 Added click-to-move functionality
+
 # 0.0.2
 
 * 2023-04-23 Added undo functionality.

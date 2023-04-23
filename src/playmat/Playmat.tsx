@@ -7,10 +7,11 @@ import { store, useStoreActions, useStoreState } from "../model/storeModel";
 interface Props {
   setup?: (cardStacks: CardStacks, moveCard: ActionCreator<MoveCardPayload>) => void;
   isWin?: (cardStacks: CardStacks) => boolean;
+  preferredMoveStacks?: string[];
   children?: ReactNode;
 }
 
-const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, children }) => {
+const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, preferredMoveStacks, children }) => {
   const cardStacks = useStoreState(
     (store) => store.cardStacks,
     (previous, next) => Object.keys(previous).length === Object.keys(next).length
@@ -18,10 +19,12 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, children }) => {
   const setupHasRun = useStoreState((store) => store.setupHasRun);
   const storeIsWin = useStoreState((store) => store.isWin);
   const win = useStoreState((store) => store.win);
+  const storePreferredMoveStacks = useStoreState((store) => store.preferredMoveStacks);
   const moveCard = useStoreActions((store) => store.moveCard);
   const setSetupHasRun = useStoreActions((store) => store.setSetupHasRun);
   const setIsWin = useStoreActions((store) => store.setIsWin);
   const undo = useStoreActions((store) => store.undo);
+  const setPreferredMoveStacks = useStoreActions((store) => store.setPreferredMoveStacks);
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
@@ -41,6 +44,12 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, children }) => {
   }, [isWin]);
 
   useEffect(() => {
+    if (!storePreferredMoveStacks.length && preferredMoveStacks) {
+      setPreferredMoveStacks(preferredMoveStacks);
+    }
+  }, [preferredMoveStacks]);
+
+  useEffect(() => {
     if (!setupHasRun && cardStacks && Object.keys(cardStacks).length) {
       setup?.(cardStacks, moveCard);
       setSetupHasRun(true);
@@ -50,13 +59,11 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, children }) => {
   return <>{win ? <div>Congratulations!</div> : children}</>;
 };
 
-const Playmat: FunctionComponent<Props> = ({ setup, isWin, children }) => {
+const Playmat: FunctionComponent<Props> = ({ children, ...innerArgs }) => {
   return (
     <StoreProvider store={store}>
       <DndProvider backend={HTML5Backend}>
-        <PlaymatInner setup={setup} isWin={isWin}>
-          {children}
-        </PlaymatInner>
+        <PlaymatInner {...innerArgs}>{children}</PlaymatInner>
       </DndProvider>
     </StoreProvider>
   );

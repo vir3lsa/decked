@@ -116,6 +116,8 @@ export const Emscell: Story = {
           toStack = 1;
         }
       });
-    }
+    },
+    isWin: isWin,
+    preferredMoveStacks: ["col1", "col2", "col3", "col4", "col5", "col6", "col7", "col8"]
   }
 };
