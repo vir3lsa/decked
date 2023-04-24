@@ -2,6 +2,7 @@
 
 # Unreleased
 
+* 2023-04-24 onMove callback and auto moving cards to suit decks in Emscell.
 * 2023-04-23 Improved click-to-move preferential ordering.
 
 # 0.0.3

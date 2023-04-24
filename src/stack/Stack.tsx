@@ -41,7 +41,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
   const cardStacks = useStoreState((state) => state.cardStacks);
   const cardsInStack = useStoreState((state) => state.cardStacks[name]?.cards);
   const addStack = useStoreActions((state) => state.addStack);
-  const moveCard = useStoreActions((state) => state.moveCard);
+  const moveCardThunk = useStoreActions((state) => state.moveCardThunk);
   const canDragFunc = typeof canDrag === "function" ? canDrag : () => canDrag;
   const canDropFunc = typeof canDrop === "function" ? canDrop : () => canDrop;
 
@@ -57,7 +57,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
   const [, dropRef] = useDrop(
     () => ({
       accept: ItemTypes.CARD,
-      drop: (card) => moveCard({ card: card as ICard, toStack: name }),
+      drop: (card) => moveCardThunk({ card: card as ICard, toStack: name }),
       canDrop: (card) => {
         return canDrop ? canDropFunc(cardStacks, name, card as ICard) : true;
       }

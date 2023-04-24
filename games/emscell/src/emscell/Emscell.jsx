@@ -77,11 +77,53 @@ const canDropOnSpread = (cardStacks, stackName, card) => {
   return canDrop;
 };
 
+const onMove = (cardStacks, moveCardThunk) => {
+  const playStacks = Object.values(cardStacks).filter((stack) => !stack.name.startsWith("suit"));
+  const suitStacks = Object.values(cardStacks).filter((stack) => stack.name.startsWith("suit"));
+
+  let cardToMove, destinationStack;
+
+  playStacks.forEach((playStack) => {
+    if (cardToMove) {
+      // Short-circuit if we've already found a card to move.
+      return;
+    }
+    // Look at the last card of the stack.
+    const candidate = playStack.cards.length && playStack.cards[playStack.cards.length - 1];
+
+    if (!candidate) {
+      // If the stack's empty, move on.
+      return;
+    }
+
+    const availableSuitStack = suitStacks.find((suitStack) => {
+      const lastSuitCard = suitStack.cards.length && suitStack.cards[suitStack.cards.length - 1];
+
+      if (lastSuitCard && lastSuitCard.suit === candidate.suit && lastSuitCard.rank === candidate.rank - 1) {
+        return true;
+      } else if (!lastSuitCard && candidate.rank === 1) {
+        return true;
+      }
+    });
+
+    if (availableSuitStack) {
+      // We've got a match!
+      cardToMove = candidate;
+      destinationStack = availableSuitStack;
+    }
+  });
+
+  if (cardToMove && destinationStack) {
+    moveCardThunk({ card: cardToMove, toStack: destinationStack.name });
+  }
+};
+
 const Emscell = () => (
   <Playmat
     setup={setup}
     isWin={isWin}
     preferredMoveStacks={["col1", "col2", "col3", "col4", "col5", "col6", "col7", "col8"]}
+    onMove={onMove}
   >
     <>
       <div style={topRowStyle}>

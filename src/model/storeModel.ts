@@ -1,4 +1,7 @@
-import { action, Action, createStore, createTypedHooks, thunk, Thunk } from "easy-peasy";
+import { action, Action, createStore, createTypedHooks, thunk, Thunk, ThunkCreator } from "easy-peasy";
+
+export type MoveCard = ThunkCreator<MoveCardPayload>;
+export type OnMove = (cardStacks: CardStacks, moveCard: MoveCard) => void;
 
 export interface StoreModel {
   cardStacks: CardStacks;
@@ -7,13 +10,16 @@ export interface StoreModel {
   win: boolean;
   history: Move[];
   preferredMoveStacks: string[];
+  onMove?: OnMove;
   addStack: Action<StoreModel, IStack>;
   moveCard: Action<StoreModel, MoveCardPayload>;
+  moveCardThunk: Thunk<StoreModel, MoveCardPayload>;
   setSetupHasRun: Action<StoreModel, boolean>;
   setIsWin: Action<StoreModel, IsWin>;
   undo: Action<StoreModel>;
   clickMove: Thunk<StoreModel, ICard>;
   setPreferredMoveStacks: Action<StoreModel, string[]>;
+  setOnMove: Action<StoreModel, OnMove>;
 }
 
 const findCard = (cardId: string, cardStacks: CardStacks): ICard => {
@@ -78,15 +84,25 @@ export const store = createStore<StoreModel>({
     }
 
     if (state.setupHasRun) {
-      // Record the move
-      state.history.push({
+      const move = {
         cards: [payload.card.id],
         fromStack: fromStack.name,
         toStack: payload.toStack,
         fromIndex,
         toIndex: state.cardStacks[payload.toStack].cards.length - 1
-      });
+      };
+
+      // Record the move
+      state.history.push(move);
     }
+  }),
+  moveCardThunk: thunk((actions, payload, helpers) => {
+    // Update the state.
+    actions.moveCard(payload);
+
+    // Trigger onMove callback.
+    const state = helpers.getState();
+    state.onMove?.(state.cardStacks, actions.moveCardThunk);
   }),
   setSetupHasRun: action((state, setupHasRun) => {
     state.setupHasRun = setupHasRun;
@@ -143,13 +159,16 @@ export const store = createStore<StoreModel>({
       bestStack = availableStacks[0];
     }
 
-    actions.moveCard({
+    actions.moveCardThunk({
       card,
       toStack: bestStack.name
     });
   }),
   setPreferredMoveStacks: action((state, stacks) => {
     state.preferredMoveStacks = stacks;
+  }),
+  setOnMove: action((state, onMove) => {
+    state.onMove = onMove;
   })
 });
 

@@ -156,3 +156,16 @@ export const preferredMoveStacks: Story = {
     preferredMoveStacks: ["eee", "bbb", "ggg", "ddd", "ccc", "fff"]
   }
 };
+
+export const OnMove: Story = {
+  args: {
+    children: (
+      <div style={parentStyle}>
+        <Stack name="notSpread2" spread={false} initialContents="fullDeck" />
+        <Stack name="empty2" spread={false} initialContents="empty" />
+        <Stack name="spread2" spread initialContents="fullDeck" />
+      </div>
+    ),
+    onMove: () => window.alert("Moved a card")
+  }
+};
