@@ -102,14 +102,15 @@ interface Props {
   id: string;
   suit: "hearts" | "diamonds" | "spades" | "clubs";
   rank: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
+  colour: Colour;
   top?: string;
   canDrag?: (card: ICard) => boolean;
 }
 
-const Card: FunctionComponent<Props> = ({ id, suit, rank, top, canDrag }) => {
+const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, canDrag }) => {
   const [style, setStyle] = useState(cardStyle);
   const clickMove = useStoreActions((store) => store.clickMove);
-  const card = { id, suit, rank };
+  const card = { id, suit, rank, colour };
 
   const [, dragRef] = useDrag(
     () => ({
@@ -124,7 +125,7 @@ const Card: FunctionComponent<Props> = ({ id, suit, rank, top, canDrag }) => {
     const canMove = canDrag ? canDrag(card) : true;
 
     if (canMove) {
-      clickMove({ id, suit, rank });
+      clickMove(card);
     }
   };
 

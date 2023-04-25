@@ -40,6 +40,7 @@ export const AceOfSpades: Story = {
   args: {
     id: "1",
     suit: "spades",
+    colour: "black",
     rank: 1
   }
 };

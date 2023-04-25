@@ -13,14 +13,19 @@ interface Props {
   canDrop?: CanDragOrDrop;
 }
 
-const suits: Suit[] = ["hearts", "spades", "diamonds", "clubs"];
+const suitsAndColours: SuitAndColour[] = [
+  ["hearts", "red"],
+  ["spades", "black"],
+  ["diamonds", "red"],
+  ["clubs", "black"]
+];
 const ranks: Rank[] = Array.from(Array(13)).map((_, rank) => (rank + 1) as Rank);
 
 const createDeck = () => {
   let deck: ICard[] = [];
 
-  suits.forEach((suit) => {
-    const suitCards = ranks.map((rank) => ({ suit, rank, id: uuid4() }));
+  suitsAndColours.forEach(([suit, colour]) => {
+    const suitCards = ranks.map((rank) => ({ suit, rank, colour, id: uuid4() }));
     deck = [...deck, ...suitCards];
   });
 
@@ -74,6 +79,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
             id={card.id}
             suit={card.suit}
             rank={card.rank}
+            colour={card.colour}
             top={`${index * SPREAD_FACTOR}px`}
             canDrag={(card) => {
               return canDrag ? canDragFunc(cardStacks, name, card) : true;
@@ -85,6 +91,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
           id={topCard.id}
           suit={topCard.suit}
           rank={topCard.rank}
+          colour={topCard.colour}
           canDrag={(card) => (canDrag ? canDragFunc(cardStacks, name, card) : true)}
         />
       ) : (

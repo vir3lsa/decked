@@ -50,13 +50,7 @@ const canDropOnSuit = (cardStacks: CardStacks, stackName: string, card: ICard) =
 const canDropOnSpread = (cardStacks: CardStacks, stackName: string, card: ICard) => {
   const cards = cardStacks[stackName].cards;
   const lastCard = cards[cards.length - 1];
-  const canDrop =
-    !lastCard ||
-    ((((card.suit === "hearts" || card.suit === "diamonds") &&
-      (lastCard.suit === "spades" || lastCard.suit === "clubs")) ||
-      ((card.suit === "spades" || card.suit === "clubs") &&
-        (lastCard.suit === "hearts" || lastCard.suit === "diamonds"))) &&
-      lastCard.rank === card.rank + 1);
+  const canDrop = !lastCard || (card.colour !== lastCard.colour && lastCard.rank === card.rank + 1);
   return canDrop;
 };
 
@@ -133,44 +127,63 @@ export const Emscell: Story = {
       "col8"
     ],
     onMove: (cardStacks, moveCardThunk) => {
-      const playStacks = Object.values(cardStacks).filter((stack) => !stack.name.startsWith("suit"));
-      const suitStacks = Object.values(cardStacks).filter((stack) => stack.name.startsWith("suit"));
+      setTimeout(() => {
+        const playStacks = Object.values(cardStacks).filter((stack) => !stack.name.startsWith("suit"));
+        const suitStacks = Object.values(cardStacks).filter((stack) => stack.name.startsWith("suit"));
 
-      let cardToMove: ICard | undefined, destinationStack: IStack | undefined;
+        let cardToMove: ICard | undefined, destinationStack: IStack | undefined;
 
-      playStacks.forEach((playStack) => {
-        if (cardToMove) {
-          // Short-circuit if we've already found a card to move.
-          return;
-        }
-        // Look at the last card of the stack.
-        const candidate = playStack.cards.length && playStack.cards[playStack.cards.length - 1];
+        playStacks.forEach((playStack) => {
+          if (cardToMove) {
+            // Short-circuit if we've already found a card to move.
+            return;
+          }
+          // Look at the last card of the stack.
+          const candidate = playStack.cards.length && playStack.cards[playStack.cards.length - 1];
 
-        if (!candidate) {
-          // If the stack's empty, move on.
-          return;
-        }
+          if (!candidate) {
+            // If the stack's empty, move on.
+            return;
+          }
 
-        const availableSuitStack = suitStacks.find((suitStack) => {
-          const lastSuitCard = suitStack.cards.length && suitStack.cards[suitStack.cards.length - 1];
+          // Check there's nothing in the top layer that could be put on this card.
+          const stackWithDroppableCard = playStacks
+            .filter((stack) => stack.name !== playStack.name)
+            .find((stack) => {
+              const topCard = stack.cards[stack.cards.length - 1];
 
-          if (lastSuitCard && lastSuitCard.suit === candidate.suit && lastSuitCard.rank === candidate.rank - 1) {
-            return true;
-          } else if (!lastSuitCard && candidate.rank === 1) {
-            return true;
+              if (topCard && topCard.colour !== candidate.colour && topCard.rank === candidate.rank - 1) {
+                // This card could drop on the candidate, so it's a match.
+                return true;
+              }
+            });
+
+          if (stackWithDroppableCard) {
+            // Short-circuit as this candidate has a card that could drop on it.
+            return;
+          }
+
+          const availableSuitStack = suitStacks.find((suitStack) => {
+            const lastSuitCard = suitStack.cards.length && suitStack.cards[suitStack.cards.length - 1];
+
+            if (lastSuitCard && lastSuitCard.suit === candidate.suit && lastSuitCard.rank === candidate.rank - 1) {
+              return true;
+            } else if (!lastSuitCard && candidate.rank === 1) {
+              return true;
+            }
+          });
+
+          if (availableSuitStack) {
+            // We've got a match!
+            cardToMove = candidate;
+            destinationStack = availableSuitStack;
           }
         });
 
-        if (availableSuitStack) {
-          // We've got a match!
-          cardToMove = candidate;
-          destinationStack = availableSuitStack;
+        if (cardToMove && destinationStack) {
+          moveCardThunk({ card: cardToMove, toStack: destinationStack.name });
         }
-      });
-
-      if (cardToMove && destinationStack) {
-        moveCardThunk({ card: cardToMove, toStack: destinationStack.name });
-      }
+      }, 50);
     }
   }
 };

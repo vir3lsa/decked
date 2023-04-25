@@ -1,10 +1,13 @@
 type Suit = "hearts" | "spades" | "diamonds" | "clubs";
 type Rank = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
+type Colour = "red" | "black";
+type SuitAndColour = [Suit, Colour];
 
 interface ICard {
   id: string;
   suit: Suit;
   rank: Rank;
+  colour: Colour;
 }
 
 type CanDragOrDropFunc = (cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
