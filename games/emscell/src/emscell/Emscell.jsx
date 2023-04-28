@@ -2,7 +2,26 @@ import React from "react";
 import Playmat from "../../../../lib/playmat";
 import Stack from "../../../../lib/stack";
 
-const setup = (cardStacks, moveCard) => {
+const findStack = (cardStacks, cardId) => {
+  let fromStack, fromIndex;
+  Object.values(cardStacks).forEach((stack) => {
+    if (fromStack) {
+      // Short-circuit if we've already found the stack.
+      return;
+    }
+
+    const indexOfCard = stack.cards.findIndex((card) => card.id === cardId);
+
+    if (indexOfCard > -1) {
+      fromStack = stack;
+      fromIndex = indexOfCard;
+    }
+  });
+
+  return [fromStack, fromIndex];
+};
+
+const setup = (cardStacks, moveCardThunk) => {
   const deck = cardStacks["spaceA"].cards;
   const indices = Array.from(Array(52)).map((_, index) => index);
   const shuffledDeck = Array.from(Array(52));
@@ -15,7 +34,7 @@ const setup = (cardStacks, moveCard) => {
 
   let toStack = 1;
   shuffledDeck.forEach((card) => {
-    moveCard({ card, toStack: `col${toStack}` });
+    moveCardThunk({ card, toStack: `col${toStack}` });
     toStack++;
 
     if (toStack > 8) {
@@ -53,32 +72,78 @@ const suitsStyle = {
   marginLeft: "50px"
 };
 
-const canDrag = (cardStacks, stackName, card) =>
-  cardStacks[stackName].cards.findIndex((cardInStack) => cardInStack.id === card.id) ===
-  cardStacks[stackName].cards.length - 1;
+const canDrag = (cardStacks, stackName, card) => {
+  const cardsInStack = cardStacks[stackName].cards;
+  const index = cardsInStack.findIndex((cardInStack) => cardInStack.id === card.id);
+  const isTopCard = index === cardsInStack.length - 1;
 
-const canDropOnSpace = (cardStacks, stackName) => cardStacks[stackName].cards.length < 1;
+  // If it's the top card then we can definitely drag it.
+  if (isTopCard) {
+    return true;
+  }
+
+  // If not, we need to see whether it's part of a sequence.
+  for (let i = index + 1; i < cardsInStack.length; i++) {
+    const nextCard = cardsInStack[i];
+    const previousCard = cardsInStack[i - 1];
+
+    if (nextCard.colour === previousCard.colour || nextCard.rank !== previousCard.rank - 1) {
+      // It's not part of a sequence, so it can't be dragged.
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const canDropOnSpace = (cardStacks, stackName, card) => {
+  const [fromStack, fromIndex] = findStack(cardStacks, card.id);
+  const movingSequence = fromIndex < fromStack.cards.length - 1;
+  return cardStacks[stackName].cards.length < 1 && !movingSequence;
+};
 const canDropOnSuit = (cardStacks, stackName, card) => {
+  const [fromStack, fromIndex] = findStack(cardStacks, card.id);
+  const movingSequence = fromIndex < fromStack.cards.length - 1;
   const cards = cardStacks[stackName].cards;
   const lastCard = cards[cards.length - 1];
   const canDrop = (!lastCard && card.rank === 1) || (lastCard?.suit === card.suit && lastCard?.rank === card.rank - 1);
-  return canDrop;
+  return canDrop && !movingSequence;
 };
 const canDropOnSpread = (cardStacks, stackName, card) => {
+  const [fromStack, fromIndex] = findStack(cardStacks, card.id);
+  const movingSequence = fromIndex < fromStack.cards.length - 1;
+
+  if (movingSequence) {
+    // If we're moving a sequence, work out whether there are enough free spaces.
+    const numFreeCells = Object.values(cardStacks).filter(
+      (stack) => stack.name.startsWith("space") && !stack.cards.length
+    ).length;
+    const numFreeSpreads = Object.values(cardStacks).filter(
+      (stack) => stack.name.startsWith("col") && !stack.cards.length && stack.name !== stackName
+    ).length;
+    const maxMoveableCards = (numFreeCells + 1) * 2 ** numFreeSpreads;
+    const cardsToMove = fromStack.cards.length - fromIndex;
+
+    if (cardsToMove > maxMoveableCards) {
+      return false;
+    }
+  }
+
   const cards = cardStacks[stackName].cards;
   const lastCard = cards[cards.length - 1];
-  const canDrop =
-    !lastCard ||
-    ((((card.suit === "hearts" || card.suit === "diamonds") &&
-      (lastCard.suit === "spades" || lastCard.suit === "clubs")) ||
-      ((card.suit === "spades" || card.suit === "clubs") &&
-        (lastCard.suit === "hearts" || lastCard.suit === "diamonds"))) &&
-      lastCard.rank === card.rank + 1);
+  const canDrop = !lastCard || (card.colour !== lastCard.colour && lastCard.rank === card.rank + 1);
   return canDrop;
 };
 
-const onMove = (cardStacks, moveCardThunk) => {
+const onMove = (cardStacks, move, moveCardThunk) => {
   setTimeout(() => {
+    const fromStackCards = cardStacks[move.fromStack].cards;
+
+    if (move.fromIndex < fromStackCards.length) {
+      // Wasn't moved from top of stack, so moving a sequence. Now move the next card in the sequence.
+      return moveCardThunk({ card: fromStackCards[move.fromIndex], toStack: move.toStack });
+    }
+
     const playStacks = Object.values(cardStacks).filter((stack) => !stack.name.startsWith("suit"));
     const suitStacks = Object.values(cardStacks).filter((stack) => stack.name.startsWith("suit"));
 

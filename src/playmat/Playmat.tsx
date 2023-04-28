@@ -1,11 +1,11 @@
-import { ActionCreator, StoreProvider } from "easy-peasy";
+import { StoreProvider, ThunkCreator } from "easy-peasy";
 import React, { FunctionComponent, ReactNode, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { OnMove, store, useStoreActions, useStoreState } from "../model/storeModel";
 
 interface Props {
-  setup?: (cardStacks: CardStacks, moveCard: ActionCreator<MoveCardPayload>) => void;
+  setup?: (cardStacks: CardStacks, moveCardThunk: ThunkCreator<MoveCardThunkPayload>) => void;
   isWin?: IsWin;
   onMove?: OnMove;
   preferredMoveStacks?: string[];
@@ -23,7 +23,7 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, onMove, preferre
   const storePreferredMoveStacks = useStoreState((store) => store.preferredMoveStacks);
   const storeOnMove = useStoreState((store) => store.onMove);
 
-  const moveCard = useStoreActions((store) => store.moveCard);
+  const moveCardThunk = useStoreActions((store) => store.moveCardThunk);
   const setSetupHasRun = useStoreActions((store) => store.setSetupHasRun);
   const setIsWin = useStoreActions((store) => store.setIsWin);
   const undo = useStoreActions((store) => store.undo);
@@ -61,7 +61,7 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, onMove, preferre
 
   useEffect(() => {
     if (!setupHasRun && cardStacks && Object.keys(cardStacks).length) {
-      setup?.(cardStacks, moveCard);
+      setup?.(cardStacks, moveCardThunk);
       setSetupHasRun(true);
     }
   }, [setup, cardStacks]);

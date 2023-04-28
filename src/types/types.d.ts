@@ -23,9 +23,14 @@ interface CardStacks {
   [name: string]: IStack;
 }
 
-interface MoveCardPayload {
+interface MoveCardThunkPayload {
   card: ICard;
   toStack: string;
+}
+
+interface MoveCardPayload {
+  card: ICard;
+  move: Move;
 }
 
 type IsWin = (cardStacks: CardStacks) => boolean;
