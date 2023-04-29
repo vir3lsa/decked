@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# 0.0.6
+
+* 2023-04-29 Improved styling, added shadows.
+
 # 0.0.5
 
 * 2023-04-29 Moving card sequences.

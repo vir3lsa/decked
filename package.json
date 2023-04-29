@@ -1,14 +1,15 @@
 {
   "name": "decked",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A React card game engine",
   "main": "index.js",
   "scripts": {
     "test": "jest",
     "storybook": "storybook dev -p 6006",
-    "build": "tsc",
+    "build": "tsc && npm run copy-files",
     "build-storybook": "storybook build",
     "build:emscell": "webpack --config 'games/emscell/webpack.config.js'",
+    "copy-files": "copyfiles -u 1 src/**/*.css lib/",
     "start:emscell": "http-server games/emscell/dist/"
   },
   "keywords": [
@@ -32,6 +33,7 @@
     "@types/react-dom": "^18.0.11",
     "@types/uuid": "^9.0.1",
     "babel-loader": "^9.1.2",
+    "copyfiles": "^2.4.1",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.1",
     "http-server": "^14.1.1",

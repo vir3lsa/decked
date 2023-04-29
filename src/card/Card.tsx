@@ -1,8 +1,9 @@
-import React, { CSSProperties, FunctionComponent, MouseEvent, useEffect, useState } from "react";
+import React, { CSSProperties, FunctionComponent, useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import deckImage from "../../assets/Macrovector/deck.jpg";
 import ItemTypes from "../dnd";
 import { useStoreActions } from "../model";
+import "./Card.css";
 
 const positionMap = {
   hearts: {
@@ -88,12 +89,6 @@ const positionMap = {
 };
 
 const cardStyle: CSSProperties = {
-  width: "128px",
-  height: "180px",
-  position: "absolute",
-  border: "1px solid",
-  borderRadius: "16px",
-  backgroundSize: "1480px auto",
   backgroundImage: "",
   backgroundPosition: ""
 };
@@ -138,7 +133,7 @@ const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, canDrag }
     });
   }, [suit, rank, top]);
 
-  return <div style={style} role="img" ref={dragRef} onClick={handleClick} />;
+  return <div style={style} className="card" role="img" ref={dragRef} onClick={handleClick} />;
 };
 
 export default Card;

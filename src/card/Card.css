@@ -1,0 +1,8 @@
+.card {
+    width: 128px;
+    height: 180px;
+    position: absolute;
+    border-radius: 16px;
+    background-size: 1480px auto;
+    filter: drop-shadow(-2px -2px 5px #999);
+}

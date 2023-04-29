@@ -4,6 +4,7 @@ import { useStoreActions, useStoreState } from "../model";
 import Card from "../card";
 import { useDrop } from "react-dnd";
 import ItemTypes from "../dnd";
+import "./Stack.css";
 
 interface Props {
   name: string;
@@ -30,14 +31,6 @@ const createDeck = () => {
   });
 
   return deck;
-};
-
-const emptyStackStyle: CSSProperties = {
-  width: "128px",
-  height: "180px",
-  border: "5px solid #b0b0b0",
-  borderRadius: "16px",
-  boxSizing: "border-box"
 };
 
 const SPREAD_FACTOR = 45;
@@ -95,7 +88,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
           canDrag={(card) => (canDrag ? canDragFunc(cardStacks, name, card) : true)}
         />
       ) : (
-        <div style={emptyStackStyle} />
+        <div className="empty" />
       )}
     </div>
   );
