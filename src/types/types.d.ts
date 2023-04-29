@@ -41,4 +41,5 @@ interface Move {
   toStack: string;
   fromIndex: number;
   toIndex: number;
+  fromTop: boolean;
 }

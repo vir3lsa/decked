@@ -36,6 +36,8 @@ const suitsStyle = {
   marginLeft: "50px"
 };
 
+const MOVE_TIMEOUT = 50;
+
 const findStack = (cardStacks: CardStacks, cardId: string): [IStack, number] => {
   let fromStack: IStack | undefined, fromIndex: number | undefined;
   Object.values(cardStacks).forEach((stack) => {
@@ -258,7 +260,17 @@ export const Emscell: Story = {
         if (cardToMove && destinationStack) {
           moveCardThunk({ card: cardToMove, toStack: destinationStack.name });
         }
-      }, 50);
+      }, MOVE_TIMEOUT);
+    },
+    onUndo: (_, history, undoThunk) => {
+      setTimeout(() => {
+        const lastMove = history.length && history[history.length - 1];
+
+        if (lastMove && !lastMove.fromTop) {
+          // The last move was part of a sequence, so we need to undo that too.
+          undoThunk();
+        }
+      }, MOVE_TIMEOUT);
     }
   }
 };

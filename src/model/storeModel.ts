@@ -1,7 +1,9 @@
 import { action, Action, createStore, createTypedHooks, thunk, Thunk, ThunkCreator } from "easy-peasy";
 
 export type MoveCardThunk = ThunkCreator<MoveCardThunkPayload>;
-export type OnMove = (cardStacks: CardStacks, move: Move, moveCard: MoveCardThunk) => void;
+export type UndoThunk = ThunkCreator;
+export type OnMove = (cardStacks: CardStacks, move: Move, moveCardThunk: MoveCardThunk) => void;
+export type OnUndo = (cardStacks: CardStacks, history: Move[], undoThunk: UndoThunk) => void;
 
 export interface StoreModel {
   cardStacks: CardStacks;
@@ -11,15 +13,18 @@ export interface StoreModel {
   history: Move[];
   preferredMoveStacks: string[];
   onMove?: OnMove;
+  onUndo?: OnUndo;
   addStack: Action<StoreModel, IStack>;
   moveCard: Action<StoreModel, MoveCardPayload>;
   moveCardThunk: Thunk<StoreModel, MoveCardThunkPayload>;
   setSetupHasRun: Action<StoreModel, boolean>;
   setIsWin: Action<StoreModel, IsWin>;
   undo: Action<StoreModel>;
+  undoThunk: Thunk<StoreModel>;
   clickMove: Thunk<StoreModel, ICard>;
   setPreferredMoveStacks: Action<StoreModel, string[]>;
   setOnMove: Action<StoreModel, OnMove>;
+  setOnUndo: Action<StoreModel, OnUndo>;
 }
 
 const findCard = (cardId: string, cardStacks: CardStacks): ICard => {
@@ -96,7 +101,8 @@ export const store = createStore<StoreModel>({
       fromStack: fromStack.name,
       toStack: payload.toStack,
       fromIndex,
-      toIndex: state.cardStacks[payload.toStack].cards.length
+      toIndex: state.cardStacks[payload.toStack].cards.length,
+      fromTop: fromIndex === fromStack.cards.length - 1
     };
 
     // Update the state.
@@ -129,6 +135,16 @@ export const store = createStore<StoreModel>({
       } else {
         throw Error("Couldn't undo: couldn't find cards or fromStack or toStack");
       }
+    }
+  }),
+  undoThunk: thunk((actions, _, helpers) => {
+    let state = helpers.getState();
+    const lastMove = state.history[state.history.length - 1];
+
+    if (lastMove) {
+      actions.undo();
+      state = helpers.getState();
+      state.onUndo?.(state.cardStacks, state.history, actions.undoThunk);
     }
   }),
   clickMove: thunk((actions, card, helpers) => {
@@ -177,6 +193,9 @@ export const store = createStore<StoreModel>({
   }),
   setOnMove: action((state, onMove) => {
     state.onMove = onMove;
+  }),
+  setOnUndo: action((state, onUndo) => {
+    state.onUndo = onUndo;
   })
 });
 

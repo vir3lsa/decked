@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# 0.0.5
+
+* 2023-04-29 Moving card sequences.
+
 # 0.0.4
 
 * 2023-04-24 onMove callback and auto moving cards to suit decks in Emscell.

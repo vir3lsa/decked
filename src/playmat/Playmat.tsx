@@ -2,17 +2,18 @@ import { StoreProvider, ThunkCreator } from "easy-peasy";
 import React, { FunctionComponent, ReactNode, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { OnMove, store, useStoreActions, useStoreState } from "../model/storeModel";
+import { OnMove, OnUndo, store, useStoreActions, useStoreState } from "../model/storeModel";
 
 interface Props {
   setup?: (cardStacks: CardStacks, moveCardThunk: ThunkCreator<MoveCardThunkPayload>) => void;
   isWin?: IsWin;
   onMove?: OnMove;
+  onUndo?: OnUndo;
   preferredMoveStacks?: string[];
   children?: ReactNode;
 }
 
-const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, onMove, preferredMoveStacks, children }) => {
+const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, onMove, onUndo, preferredMoveStacks, children }) => {
   const cardStacks = useStoreState(
     (store) => store.cardStacks,
     (previous, next) => Object.keys(previous).length === Object.keys(next).length
@@ -22,18 +23,20 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, onMove, preferre
   const win = useStoreState((store) => store.win);
   const storePreferredMoveStacks = useStoreState((store) => store.preferredMoveStacks);
   const storeOnMove = useStoreState((store) => store.onMove);
+  const storeOnUndo = useStoreState((store) => store.onUndo);
 
   const moveCardThunk = useStoreActions((store) => store.moveCardThunk);
   const setSetupHasRun = useStoreActions((store) => store.setSetupHasRun);
   const setIsWin = useStoreActions((store) => store.setIsWin);
-  const undo = useStoreActions((store) => store.undo);
+  const undoThunk = useStoreActions((store) => store.undoThunk);
   const setPreferredMoveStacks = useStoreActions((store) => store.setPreferredMoveStacks);
   const setOnMove = useStoreActions((store) => store.setOnMove);
+  const setOnUndo = useStoreActions((store) => store.setOnUndo);
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
       if (event.key === "z" || event.key === "u") {
-        undo();
+        undoThunk();
       }
     };
 
@@ -58,6 +61,12 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, onMove, preferre
       setOnMove(onMove);
     }
   }, [onMove]);
+
+  useEffect(() => {
+    if (!storeOnUndo && onUndo) {
+      setOnUndo(onUndo);
+    }
+  }, [onUndo]);
 
   useEffect(() => {
     if (!setupHasRun && cardStacks && Object.keys(cardStacks).length) {

@@ -72,6 +72,8 @@ const suitsStyle = {
   marginLeft: "50px"
 };
 
+const MOVE_TIMEOUT = 50;
+
 const canDrag = (cardStacks, stackName, card) => {
   const cardsInStack = cardStacks[stackName].cards;
   const index = cardsInStack.findIndex((cardInStack) => cardInStack.id === card.id);
@@ -202,6 +204,17 @@ const onMove = (cardStacks, move, moveCardThunk) => {
   }, 50);
 };
 
+const onUndo = (_, history, undoThunk) => {
+  setTimeout(() => {
+    const lastMove = history.length && history[history.length - 1];
+
+    if (lastMove && !lastMove.fromTop) {
+      // The last move was part of a sequence, so we need to undo that too.
+      undoThunk();
+    }
+  }, MOVE_TIMEOUT);
+};
+
 const Emscell = () => (
   <Playmat
     setup={setup}
@@ -221,6 +234,7 @@ const Emscell = () => (
       "col8"
     ]}
     onMove={onMove}
+    onUndo={onUndo}
   >
     <>
       <div style={topRowStyle}>
