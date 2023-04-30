@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# 0.0.7
+
+* 2023-04-30 Added custom drag layer.
+
 # 0.0.6
 
 * 2023-04-29 Improved styling, added shadows.

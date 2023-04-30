@@ -1,1 +1,1 @@
-export { useStoreState, useStoreActions, useStoreDispatch } from "./storeModel";
+export { useStoreState, useStoreActions, useStoreDispatch, findStack } from "./storeModel";

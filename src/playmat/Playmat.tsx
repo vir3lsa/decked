@@ -2,6 +2,7 @@ import { StoreProvider, ThunkCreator } from "easy-peasy";
 import React, { FunctionComponent, ReactNode, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import DragLayer from "../dragLayer";
 import { OnMove, OnUndo, store, useStoreActions, useStoreState } from "../model/storeModel";
 
 interface Props {
@@ -10,10 +11,19 @@ interface Props {
   onMove?: OnMove;
   onUndo?: OnUndo;
   preferredMoveStacks?: string[];
+  dragMultiple?: boolean;
   children?: ReactNode;
 }
 
-const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, onMove, onUndo, preferredMoveStacks, children }) => {
+const PlaymatInner: FunctionComponent<Props> = ({
+  setup,
+  isWin,
+  onMove,
+  onUndo,
+  preferredMoveStacks,
+  dragMultiple,
+  children
+}) => {
   const cardStacks = useStoreState(
     (store) => store.cardStacks,
     (previous, next) => Object.keys(previous).length === Object.keys(next).length
@@ -32,6 +42,7 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, onMove, onUndo, 
   const setPreferredMoveStacks = useStoreActions((store) => store.setPreferredMoveStacks);
   const setOnMove = useStoreActions((store) => store.setOnMove);
   const setOnUndo = useStoreActions((store) => store.setOnUndo);
+  const setDragMultiple = useStoreActions((store) => store.setDragMultiple);
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
@@ -57,6 +68,10 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, onMove, onUndo, 
   }, [preferredMoveStacks]);
 
   useEffect(() => {
+    setDragMultiple(dragMultiple === undefined ? true : dragMultiple);
+  }, [dragMultiple]);
+
+  useEffect(() => {
     if (!storeOnMove && onMove) {
       setOnMove(onMove);
     }
@@ -78,11 +93,14 @@ const PlaymatInner: FunctionComponent<Props> = ({ setup, isWin, onMove, onUndo, 
   return <>{win ? <div>Congratulations!</div> : children}</>;
 };
 
-const Playmat: FunctionComponent<Props> = ({ children, ...innerArgs }) => {
+const Playmat: FunctionComponent<Props> = ({ dragMultiple, children, ...innerArgs }) => {
   return (
     <StoreProvider store={store}>
       <DndProvider backend={HTML5Backend}>
-        <PlaymatInner {...innerArgs}>{children}</PlaymatInner>
+        <PlaymatInner dragMultiple={dragMultiple} {...innerArgs}>
+          {children}
+        </PlaymatInner>
+        <DragLayer dragMultiple={dragMultiple} />
       </DndProvider>
     </StoreProvider>
   );

@@ -14,6 +14,7 @@ export interface StoreModel {
   preferredMoveStacks: string[];
   onMove?: OnMove;
   onUndo?: OnUndo;
+  dragMultiple?: boolean;
   addStack: Action<StoreModel, IStack>;
   moveCard: Action<StoreModel, MoveCardPayload>;
   moveCardThunk: Thunk<StoreModel, MoveCardThunkPayload>;
@@ -25,6 +26,8 @@ export interface StoreModel {
   setPreferredMoveStacks: Action<StoreModel, string[]>;
   setOnMove: Action<StoreModel, OnMove>;
   setOnUndo: Action<StoreModel, OnUndo>;
+  setDragging: Action<StoreModel, SetDraggingPayload>;
+  setDragMultiple: Action<StoreModel, boolean>;
 }
 
 const findCard = (cardId: string, cardStacks: CardStacks): ICard => {
@@ -39,7 +42,7 @@ const findCard = (cardId: string, cardStacks: CardStacks): ICard => {
   throw Error(`Couldn't find card with ID: ${cardId}`);
 };
 
-const findStack = (cardStacks: CardStacks, cardId: string): [IStack | undefined, number | undefined] => {
+export const findStack = (cardStacks: CardStacks, cardId: string): [IStack, number] => {
   let fromStack: IStack | undefined, fromIndex: number | undefined;
   Object.values(cardStacks).forEach((stack) => {
     if (fromStack) {
@@ -54,6 +57,10 @@ const findStack = (cardStacks: CardStacks, cardId: string): [IStack | undefined,
       fromIndex = indexOfCard;
     }
   });
+
+  if (!fromStack || fromIndex === undefined) {
+    throw Error(`Couldn't find card ${cardId} in any stack.`);
+  }
 
   return [fromStack, fromIndex];
 };
@@ -196,6 +203,18 @@ export const store = createStore<StoreModel>({
   }),
   setOnUndo: action((state, onUndo) => {
     state.onUndo = onUndo;
+  }),
+  setDragging: action((state, { cardId, stack, dragging }) => {
+    const card = state.cardStacks[stack].cards.find((card) => card.id === cardId);
+
+    if (!card) {
+      throw Error(`Couldn't find card ${cardId} in stack ${stack}.`);
+    }
+
+    card.isDragging = dragging;
+  }),
+  setDragMultiple: action((state, dragMultiple) => {
+    state.dragMultiple = dragMultiple;
   })
 });
 

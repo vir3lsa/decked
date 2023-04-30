@@ -8,6 +8,7 @@ interface ICard {
   suit: Suit;
   rank: Rank;
   colour: Colour;
+  isDragging?: boolean;
 }
 
 type CanDragOrDropFunc = (cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
@@ -42,4 +43,10 @@ interface Move {
   fromIndex: number;
   toIndex: number;
   fromTop: boolean;
+}
+
+interface SetDraggingPayload {
+  cardId: string;
+  stack: string;
+  dragging: boolean;
 }

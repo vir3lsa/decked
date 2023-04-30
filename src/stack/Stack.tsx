@@ -5,6 +5,8 @@ import Card from "../card";
 import { useDrop } from "react-dnd";
 import ItemTypes from "../dnd";
 import "./Stack.css";
+import { SPREAD_FACTOR } from "../common/constants";
+import { store } from "../model/storeModel";
 
 interface Props {
   name: string;
@@ -33,11 +35,10 @@ const createDeck = () => {
   return deck;
 };
 
-const SPREAD_FACTOR = 45;
-
 const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false, canDrag = true, canDrop = true }) => {
   const cardStacks = useStoreState((state) => state.cardStacks);
   const cardsInStack = useStoreState((state) => state.cardStacks[name]?.cards);
+  const dragMultiple = useStoreState((state) => state.dragMultiple);
   const addStack = useStoreActions((state) => state.addStack);
   const moveCardThunk = useStoreActions((state) => state.moveCardThunk);
   const canDragFunc = typeof canDrag === "function" ? canDrag : () => canDrag;
@@ -63,8 +64,10 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
     [name, canDrop, cardStacks]
   );
 
+  const draggingIndex = dragMultiple ? cardsInStack?.findIndex((card) => card.isDragging) : -1;
+
   return (
-    <div style={{ position: "relative" }} ref={dropRef}>
+    <div className="stack" ref={dropRef}>
       {cardsInStack?.length && spread ? (
         cardsInStack.map((card, index) => (
           <Card
@@ -74,6 +77,8 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
             rank={card.rank}
             colour={card.colour}
             top={`${index * SPREAD_FACTOR}px`}
+            stack={name}
+            stackDragging={draggingIndex !== -1 && index > draggingIndex}
             canDrag={(card) => {
               return canDrag ? canDragFunc(cardStacks, name, card) : true;
             }}
@@ -85,6 +90,8 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
           suit={topCard.suit}
           rank={topCard.rank}
           colour={topCard.colour}
+          stack={name}
+          stackDragging={false}
           canDrag={(card) => (canDrag ? canDragFunc(cardStacks, name, card) : true)}
         />
       ) : (

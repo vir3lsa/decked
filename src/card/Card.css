@@ -6,3 +6,7 @@
     background-size: 1480px auto;
     filter: drop-shadow(-2px -2px 5px #999);
 }
+
+.stackPreview {
+    position: relative;
+}
