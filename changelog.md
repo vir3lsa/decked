@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# 0.1.0
+
+* 2023-05-01 Added New Game and Undo buttons.
+
 # 0.0.7
 
 * 2023-04-30 Added custom drag layer.

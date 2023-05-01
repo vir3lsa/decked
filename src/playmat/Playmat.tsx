@@ -1,9 +1,10 @@
 import { StoreProvider, ThunkCreator } from "easy-peasy";
-import React, { FunctionComponent, ReactNode, useEffect } from "react";
+import React, { FunctionComponent, ReactNode, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import DragLayer from "../dragLayer";
 import { OnMove, OnUndo, store, useStoreActions, useStoreState } from "../model/storeModel";
+import "./Playmat.css";
 
 interface Props {
   setup?: (cardStacks: CardStacks, moveCardThunk: ThunkCreator<MoveCardThunkPayload>) => void;
@@ -34,6 +35,7 @@ const PlaymatInner: FunctionComponent<Props> = ({
   const storePreferredMoveStacks = useStoreState((store) => store.preferredMoveStacks);
   const storeOnMove = useStoreState((store) => store.onMove);
   const storeOnUndo = useStoreState((store) => store.onUndo);
+  const history = useStoreState((store) => store.history);
 
   const moveCardThunk = useStoreActions((store) => store.moveCardThunk);
   const setSetupHasRun = useStoreActions((store) => store.setSetupHasRun);
@@ -43,6 +45,11 @@ const PlaymatInner: FunctionComponent<Props> = ({
   const setOnMove = useStoreActions((store) => store.setOnMove);
   const setOnUndo = useStoreActions((store) => store.setOnUndo);
   const setDragMultiple = useStoreActions((store) => store.setDragMultiple);
+  const undo = useStoreActions((store) => store.undoThunk);
+  const recordInitialCardStacks = useStoreActions((store) => store.recordInitialCardStacks);
+  const resetToInitialState = useStoreActions((store) => store.resetToInitialState);
+
+  const [confirmationDisplayed, setConfirmationDisplayed] = useState(false);
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
@@ -85,12 +92,66 @@ const PlaymatInner: FunctionComponent<Props> = ({
 
   useEffect(() => {
     if (!setupHasRun && cardStacks && Object.keys(cardStacks).length) {
+      recordInitialCardStacks();
       setup?.(cardStacks, moveCardThunk);
       setSetupHasRun(true);
     }
   }, [setup, cardStacks]);
 
-  return <>{win ? <div>Congratulations!</div> : children}</>;
+  const handleUndo = () => {
+    if (!onUndo || storeOnUndo) {
+      undo();
+    }
+  };
+
+  const handleNewGame = () => {
+    setConfirmationDisplayed(false);
+
+    if (setupHasRun) {
+      setSetupHasRun(false);
+      resetToInitialState();
+      setup?.(cardStacks, moveCardThunk);
+      setSetupHasRun(true);
+    }
+  };
+
+  return (
+    <>
+      {win ? (
+        <div>Congratulations!</div>
+      ) : (
+        <>
+          <div className="buttonBar">
+            {confirmationDisplayed && (
+              <>
+                <label className="label">Are you sure?</label>
+                <input type="button" value="NO" className="button" onClick={() => setConfirmationDisplayed(false)} />
+                <input type="button" value="YES" className="button" onClick={handleNewGame} />
+              </>
+            )}
+            {!confirmationDisplayed && (
+              <>
+                <input
+                  type="button"
+                  value="NEW GAME"
+                  className="button"
+                  onClick={() => setConfirmationDisplayed(true)}
+                />
+                <input
+                  type="button"
+                  value="UNDO (Z/U)"
+                  className="button"
+                  onClick={handleUndo}
+                  disabled={!history.length}
+                />
+              </>
+            )}
+          </div>
+          {children}
+        </>
+      )}
+    </>
+  );
 };
 
 const Playmat: FunctionComponent<Props> = ({ dragMultiple, children, ...innerArgs }) => {

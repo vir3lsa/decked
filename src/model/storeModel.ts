@@ -7,6 +7,7 @@ export type OnUndo = (cardStacks: CardStacks, history: Move[], undoThunk: UndoTh
 
 export interface StoreModel {
   cardStacks: CardStacks;
+  initialCardStacks: CardStacks;
   setupHasRun: boolean;
   isWin?: IsWin;
   win: boolean;
@@ -28,6 +29,8 @@ export interface StoreModel {
   setOnUndo: Action<StoreModel, OnUndo>;
   setDragging: Action<StoreModel, SetDraggingPayload>;
   setDragMultiple: Action<StoreModel, boolean>;
+  recordInitialCardStacks: Action<StoreModel>;
+  resetToInitialState: Action<StoreModel>;
 }
 
 const findCard = (cardId: string, cardStacks: CardStacks): ICard => {
@@ -67,6 +70,7 @@ export const findStack = (cardStacks: CardStacks, cardId: string): [IStack, numb
 
 export const store = createStore<StoreModel>({
   cardStacks: {},
+  initialCardStacks: {},
   setupHasRun: false,
   win: false,
   history: [],
@@ -215,6 +219,25 @@ export const store = createStore<StoreModel>({
   }),
   setDragMultiple: action((state, dragMultiple) => {
     state.dragMultiple = dragMultiple;
+  }),
+  recordInitialCardStacks: action((state) => {
+    const initialCardStacks: CardStacks = {};
+
+    Object.values(state.cardStacks).forEach((stack) => {
+      initialCardStacks[stack.name] = { ...stack, cards: stack.cards.map((card) => ({ ...card })) };
+    });
+
+    state.initialCardStacks = initialCardStacks;
+  }),
+  resetToInitialState: action((state) => {
+    const cardStacks: CardStacks = {};
+
+    Object.values(state.initialCardStacks).forEach((stack) => {
+      cardStacks[stack.name] = { ...stack, cards: stack.cards.map((card) => ({ ...card })) };
+    });
+
+    state.cardStacks = cardStacks;
+    state.history = [];
   })
 });
 
