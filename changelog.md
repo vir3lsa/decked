@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# 0.1.1
+
+* 2023-05-01 Added mouseover decorations.
+
 # 0.1.0
 
 * 2023-05-01 Added New Game and Undo buttons.

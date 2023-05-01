@@ -1,4 +1,4 @@
-import React, { CSSProperties, FunctionComponent, useEffect, useState } from "react";
+import React, { CSSProperties, FunctionComponent, useEffect, useMemo, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import deckImage from "../../assets/Macrovector/deck.jpg";
@@ -29,11 +29,13 @@ const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, stack, st
   const setDragging = useStoreActions((store) => store.setDragging);
   const card = { id, suit, rank, colour };
 
+  const ableToDrag = useMemo(() => () => canDrag ? canDrag(card) : true, [id, suit, rank, canDrag]);
+
   const [{ isDragging }, dragRef, previewRef] = useDrag(
     () => ({
       type: ItemTypes.CARD,
       item: () => card,
-      canDrag: () => (canDrag ? canDrag(card) : true),
+      canDrag: ableToDrag,
       collect: (monitor: DragSourceMonitor) => ({
         isDragging: monitor.isDragging()
       })
@@ -69,7 +71,17 @@ const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, stack, st
     });
   }, [suit, rank, top, isDragging, stackDragging]);
 
-  return <div style={style} className="card" role="img" ref={dragRef} onClick={handleClick} />;
+  return (
+    <div className="cardHover">
+      <div
+        style={style}
+        className={`card ${ableToDrag() ? "draggable" : ""}`}
+        role="img"
+        ref={dragRef}
+        onClick={handleClick}
+      />
+    </div>
+  );
 };
 
 export default Card;

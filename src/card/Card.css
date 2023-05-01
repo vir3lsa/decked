@@ -5,8 +5,20 @@
     border-radius: 16px;
     background-size: 1480px auto;
     filter: drop-shadow(-2px -2px 5px #999);
+    transition: margin-top 0.1s ease;
+}
+
+.draggable:hover {
+    margin-top: -10px;
+}
+
+.cardHover:hover {
+    filter: drop-shadow(0px 0px 5px rgb(93, 16, 217));
+    cursor: pointer;
 }
 
 .stackPreview {
     position: relative;
+    filter: drop-shadow(0px 0px 15px rgb(129, 71, 221));
+    cursor: pointer;
 }
