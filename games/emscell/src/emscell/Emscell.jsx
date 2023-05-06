@@ -215,27 +215,38 @@ const onUndo = (_, history, undoThunk) => {
   }, MOVE_TIMEOUT);
 };
 
+const preferredMoveStacks = [
+  "suit1",
+  "suit2",
+  "suit3",
+  "suit4",
+  "col1",
+  "col2",
+  "col3",
+  "col4",
+  "col5",
+  "col6",
+  "col7",
+  "col8",
+  "spaceA",
+  "spaceB",
+  "spaceC",
+  "spaceD"
+];
+
+const compareMoveStacks = (stack1, stack2) => {
+  const occupancyComparison =
+    stack1.cards.length && !stack2.cards.length ? -1 : stack2.cards.length && !stack1.cards.length ? 1 : 0;
+
+  if (occupancyComparison !== 0) {
+    return occupancyComparison;
+  }
+
+  return preferredMoveStacks.indexOf(stack1.name) - preferredMoveStacks.indexOf(stack2.name);
+};
+
 const Emscell = () => (
-  <Playmat
-    setup={setup}
-    isWin={isWin}
-    preferredMoveStacks={[
-      "suit1",
-      "suit2",
-      "suit3",
-      "suit4",
-      "col1",
-      "col2",
-      "col3",
-      "col4",
-      "col5",
-      "col6",
-      "col7",
-      "col8"
-    ]}
-    onMove={onMove}
-    onUndo={onUndo}
-  >
+  <Playmat setup={setup} isWin={isWin} compareMoveStacks={compareMoveStacks} onMove={onMove} onUndo={onUndo}>
     <>
       <div style={topRowStyle}>
         <span style={spacesStyle}>

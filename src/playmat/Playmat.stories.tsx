@@ -139,8 +139,9 @@ export const WinFunction: Story = {
 };
 
 const canDrop = (cardStacks: CardStacks, name: string) => cardStacks[name].cards.length < 1;
+const stackOrder = ["eee", "bbb", "ggg", "ddd", "ccc", "fff"];
 
-export const preferredMoveStacks: Story = {
+export const compareMoveStacks: Story = {
   args: {
     children: (
       <div style={parentStyle}>
@@ -153,7 +154,7 @@ export const preferredMoveStacks: Story = {
         <Stack name="ggg" spread={false} canDrop={canDrop} initialContents="empty" />
       </div>
     ),
-    preferredMoveStacks: ["eee", "bbb", "ggg", "ddd", "ccc", "fff"]
+    compareMoveStacks: (stack1, stack2) => stackOrder.indexOf(stack1.name) - stackOrder.indexOf(stack2.name)
   }
 };
 

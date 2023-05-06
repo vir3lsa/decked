@@ -12,7 +12,7 @@ export interface StoreModel {
   isWin?: IsWin;
   win: boolean;
   history: Move[];
-  preferredMoveStacks: string[];
+  compareMoveStacks: StackMoveComparator;
   onMove?: OnMove;
   onUndo?: OnUndo;
   dragMultiple?: boolean;
@@ -24,7 +24,7 @@ export interface StoreModel {
   undo: Action<StoreModel>;
   undoThunk: Thunk<StoreModel>;
   clickMove: Thunk<StoreModel, ICard>;
-  setPreferredMoveStacks: Action<StoreModel, string[]>;
+  setCompareMoveStacks: Action<StoreModel, StackMoveComparator>;
   setOnMove: Action<StoreModel, OnMove>;
   setOnUndo: Action<StoreModel, OnUndo>;
   setDragging: Action<StoreModel, SetDraggingPayload>;
@@ -74,7 +74,7 @@ export const store = createStore<StoreModel>({
   setupHasRun: false,
   win: false,
   history: [],
-  preferredMoveStacks: [],
+  compareMoveStacks: () => 0,
   addStack: action((state, stack) => {
     state.cardStacks[stack.name] = stack;
   }),
@@ -177,30 +177,15 @@ export const store = createStore<StoreModel>({
       return;
     }
 
-    let bestStack, bestStackIndex: number;
-
-    // Find the best available stack, according to preference.
-    if (state.preferredMoveStacks.length) {
-      availableStacks.forEach((stack) => {
-        const orderOfPreference = state.preferredMoveStacks.indexOf(stack.name) + 1;
-        if (orderOfPreference && (!bestStackIndex || orderOfPreference < bestStackIndex)) {
-          bestStack = stack;
-          bestStackIndex = orderOfPreference;
-        }
-      });
-    }
-
-    if (!bestStack) {
-      bestStack = availableStacks[0];
-    }
+    availableStacks.sort(state.compareMoveStacks);
 
     actions.moveCardThunk({
       card,
-      toStack: bestStack.name
+      toStack: availableStacks[0].name
     });
   }),
-  setPreferredMoveStacks: action((state, stacks) => {
-    state.preferredMoveStacks = stacks;
+  setCompareMoveStacks: action((state, compareMoveStacks) => {
+    state.compareMoveStacks = compareMoveStacks;
   }),
   setOnMove: action((state, onMove) => {
     state.onMove = onMove;

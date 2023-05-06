@@ -130,6 +130,36 @@ const isWin = (cardStacks: CardStacks) =>
   cardStacks["suit3"].cards.length === 13 &&
   cardStacks["suit4"].cards.length === 13;
 
+const preferredMoveStacks = [
+  "suit1",
+  "suit2",
+  "suit3",
+  "suit4",
+  "col1",
+  "col2",
+  "col3",
+  "col4",
+  "col5",
+  "col6",
+  "col7",
+  "col8",
+  "spaceA",
+  "spaceB",
+  "spaceC",
+  "spaceD"
+];
+
+const compareMoveStacks = (stack1: IStack, stack2: IStack) => {
+  const occupancyComparison =
+    stack1.cards.length && !stack2.cards.length ? -1 : stack2.cards.length && !stack1.cards.length ? 1 : 0;
+
+  if (occupancyComparison !== 0) {
+    return occupancyComparison;
+  }
+
+  return preferredMoveStacks.indexOf(stack1.name) - preferredMoveStacks.indexOf(stack2.name);
+};
+
 export const Emscell: Story = {
   args: {
     children: (
@@ -181,21 +211,8 @@ export const Emscell: Story = {
         }
       });
     },
-    isWin: isWin,
-    preferredMoveStacks: [
-      "suit1",
-      "suit2",
-      "suit3",
-      "suit4",
-      "col1",
-      "col2",
-      "col3",
-      "col4",
-      "col5",
-      "col6",
-      "col7",
-      "col8"
-    ],
+    isWin,
+    compareMoveStacks,
     onMove: (cardStacks, move, moveCardThunk) => {
       setTimeout(() => {
         const fromStackCards = cardStacks[move.fromStack].cards;

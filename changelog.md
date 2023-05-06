@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# 0.1.3
+
+* 2023-05-06 Improved stack preference logic.
+
 # 0.1.2
 
 * 2023-05-06 Fixed New Game button disappearing after win.

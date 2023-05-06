@@ -50,3 +50,5 @@ interface SetDraggingPayload {
   stack: string;
   dragging: boolean;
 }
+
+type StackMoveComparator = (stack1: IStack, stack2: IStack) => number;

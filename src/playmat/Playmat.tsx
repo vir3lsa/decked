@@ -11,7 +11,7 @@ interface Props {
   isWin?: IsWin;
   onMove?: OnMove;
   onUndo?: OnUndo;
-  preferredMoveStacks?: string[];
+  compareMoveStacks?: StackMoveComparator;
   dragMultiple?: boolean;
   children?: ReactNode;
 }
@@ -21,7 +21,7 @@ const PlaymatInner: FunctionComponent<Props> = ({
   isWin,
   onMove,
   onUndo,
-  preferredMoveStacks,
+  compareMoveStacks,
   dragMultiple,
   children
 }) => {
@@ -32,7 +32,6 @@ const PlaymatInner: FunctionComponent<Props> = ({
   const setupHasRun = useStoreState((store) => store.setupHasRun);
   const storeIsWin = useStoreState((store) => store.isWin);
   const win = useStoreState((store) => store.win);
-  const storePreferredMoveStacks = useStoreState((store) => store.preferredMoveStacks);
   const storeOnMove = useStoreState((store) => store.onMove);
   const storeOnUndo = useStoreState((store) => store.onUndo);
   const history = useStoreState((store) => store.history);
@@ -41,7 +40,7 @@ const PlaymatInner: FunctionComponent<Props> = ({
   const setSetupHasRun = useStoreActions((store) => store.setSetupHasRun);
   const setIsWin = useStoreActions((store) => store.setIsWin);
   const undoThunk = useStoreActions((store) => store.undoThunk);
-  const setPreferredMoveStacks = useStoreActions((store) => store.setPreferredMoveStacks);
+  const setCompareMoveStacks = useStoreActions((store) => store.setCompareMoveStacks);
   const setOnMove = useStoreActions((store) => store.setOnMove);
   const setOnUndo = useStoreActions((store) => store.setOnUndo);
   const setDragMultiple = useStoreActions((store) => store.setDragMultiple);
@@ -69,10 +68,10 @@ const PlaymatInner: FunctionComponent<Props> = ({
   }, [isWin]);
 
   useEffect(() => {
-    if (!storePreferredMoveStacks.length && preferredMoveStacks) {
-      setPreferredMoveStacks(preferredMoveStacks);
+    if (compareMoveStacks) {
+      setCompareMoveStacks(compareMoveStacks);
     }
-  }, [preferredMoveStacks]);
+  }, [compareMoveStacks]);
 
   useEffect(() => {
     setDragMultiple(dragMultiple === undefined ? true : dragMultiple);
