@@ -2,6 +2,7 @@ import { StoreProvider, ThunkCreator } from "easy-peasy";
 import React, { FunctionComponent, ReactNode, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { firstCompliments, secondCompliments } from "../common/constants";
 import DragLayer from "../dragLayer";
 import { OnMove, OnUndo, store, useStoreActions, useStoreState } from "../model/storeModel";
 import "./Playmat.css";
@@ -49,6 +50,8 @@ const PlaymatInner: FunctionComponent<Props> = ({
   const resetToInitialState = useStoreActions((store) => store.resetToInitialState);
 
   const [confirmationDisplayed, setConfirmationDisplayed] = useState(false);
+  const [complimentOne, setComplimentOne] = useState<string>();
+  const [complimentTwo, setComplimentTwo] = useState<string>();
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
@@ -97,6 +100,11 @@ const PlaymatInner: FunctionComponent<Props> = ({
     }
   }, [setup, cardStacks]);
 
+  if (!complimentOne && !complimentTwo) {
+    setComplimentOne(firstCompliments[Math.floor(Math.random() * firstCompliments.length)]);
+    setComplimentTwo(secondCompliments[Math.floor(Math.random() * secondCompliments.length)]);
+  }
+
   const handleUndo = () => {
     if (!onUndo || storeOnUndo) {
       undo();
@@ -115,7 +123,7 @@ const PlaymatInner: FunctionComponent<Props> = ({
   };
 
   return (
-    <>
+    <div className="page">
       <div className="buttonBar">
         {confirmationDisplayed && (
           <>
@@ -139,8 +147,15 @@ const PlaymatInner: FunctionComponent<Props> = ({
           </>
         )}
       </div>
-      {win ? <div>Congratulations!</div> : <>{children}</>}
-    </>
+      {win ? (
+        <div className="congrats">
+          <div className="congratsTitle">Congratulations!</div>
+          <div className="congratsMessage">{`You truly are the ${complimentOne} ${complimentTwo}.`}</div>
+        </div>
+      ) : (
+        <>{children}</>
+      )}
+    </div>
   );
 };
 

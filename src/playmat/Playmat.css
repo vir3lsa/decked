@@ -1,3 +1,16 @@
+body {
+  height: 100%;
+  margin: 0;
+}
+
+html {
+  height: 100%;
+}
+
+#container {
+  height: 100%;
+}
+
 .buttonBar {
   margin-bottom: 10px;
 }
@@ -28,7 +41,39 @@
   filter: brightness(100%);
 }
 
+.congrats {
+  margin: auto;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.congratsMessage {
+  text-align: center;
+  font-style: italic;
+  font-size: large;
+  color: rgb(129, 71, 221);
+}
+
+.congratsTitle {
+  text-align: center;
+  font-weight: bold;
+  font-size: xx-large;
+  color: rgb(93, 16, 217);
+  margin-bottom: 10px;
+}
+
 .label {
   margin-right: 10px;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#storybook-root {
+  height: 100%;
 }

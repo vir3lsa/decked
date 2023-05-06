@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# 0.1.4
+
+* 2023-05-06 Improved congratulations screen.
+
 # 0.1.3
 
 * 2023-05-06 Improved stack preference logic.
