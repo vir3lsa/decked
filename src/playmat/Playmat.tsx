@@ -117,39 +117,30 @@ const PlaymatInner: FunctionComponent<Props> = ({
 
   return (
     <>
-      {win ? (
-        <div>Congratulations!</div>
-      ) : (
-        <>
-          <div className="buttonBar">
-            {confirmationDisplayed && (
-              <>
-                <label className="label">Are you sure?</label>
-                <input type="button" value="NO" className="button" onClick={() => setConfirmationDisplayed(false)} />
-                <input type="button" value="YES" className="button" onClick={handleNewGame} />
-              </>
+      <div className="buttonBar">
+        {confirmationDisplayed && (
+          <>
+            <label className="label">Are you sure?</label>
+            <input type="button" value="NO" className="button" onClick={() => setConfirmationDisplayed(false)} />
+            <input type="button" value="YES" className="button" onClick={handleNewGame} />
+          </>
+        )}
+        {!confirmationDisplayed && (
+          <>
+            <input type="button" value="NEW GAME" className="button" onClick={() => setConfirmationDisplayed(true)} />
+            {!win && (
+              <input
+                type="button"
+                value="UNDO (Z/U)"
+                className="button"
+                onClick={handleUndo}
+                disabled={!history.length}
+              />
             )}
-            {!confirmationDisplayed && (
-              <>
-                <input
-                  type="button"
-                  value="NEW GAME"
-                  className="button"
-                  onClick={() => setConfirmationDisplayed(true)}
-                />
-                <input
-                  type="button"
-                  value="UNDO (Z/U)"
-                  className="button"
-                  onClick={handleUndo}
-                  disabled={!history.length}
-                />
-              </>
-            )}
-          </div>
-          {children}
-        </>
-      )}
+          </>
+        )}
+      </div>
+      {win ? <div>Congratulations!</div> : <>{children}</>}
     </>
   );
 };
