@@ -24,6 +24,7 @@ html {
   padding: 10px;
   transition: filter 0.1s linear;
   margin-right: 10px;
+  text-transform: uppercase;
 }
 
 .button:hover {
@@ -51,6 +52,7 @@ html {
   font-style: italic;
   font-size: large;
   color: rgb(129, 71, 221);
+  margin-bottom: 40px;
 }
 
 .congratsTitle {
@@ -59,6 +61,14 @@ html {
   font-size: xx-large;
   color: rgb(93, 16, 217);
   margin-bottom: 10px;
+}
+
+.gameOverButtons {
+  text-align: center;
+}
+
+.gameOverButtons input {
+  margin: auto;
 }
 
 .label {

@@ -1,5 +1,41 @@
 export const SPREAD_FACTOR = 45;
 
+export const mainCongratulations = [
+  "Congratulations!",
+  "Well done",
+  "Nice one",
+  "Very good",
+  "Excellent",
+  "Splendid",
+  "Terrific",
+  "Sterling work",
+  "Astounding!",
+  "Astonishing",
+  "Impressive",
+  "Goodness me",
+  "Fabulous",
+  "Awesome sauce",
+  "Very nice indeed",
+  "Well look at you!",
+  "Ohh, get you!",
+  "Proper good, that",
+  "Flabbergasting"
+];
+
+export const zerothCompliments = [
+  "You truly are the",
+  "You're basically the",
+  "You could almost be the",
+  "You remind me of the",
+  "You're absolutely the",
+  "You're definitely the",
+  "You really are the",
+  "You're what they call the",
+  "You're pretty much the",
+  "Yes! You're now the",
+  "Wow, that was the"
+];
+
 export const firstCompliments = [
   "bee's",
   "dog's",
@@ -38,7 +74,7 @@ export const firstCompliments = [
   "gentlest",
   "kindest",
   "weirdest",
-  "definition of a"
+  "definition of the"
 ];
 
 export const secondCompliments = [
@@ -78,4 +114,23 @@ export const secondCompliments = [
   "hair",
   "ear",
   "neck"
+];
+
+export const playAgainLabels = [
+  "More, please",
+  "More of this",
+  "Again!",
+  "Do it again",
+  "Back to it",
+  "Don't stop",
+  "Get on with it",
+  "Let's have another",
+  "One for the road",
+  "Just one more game",
+  "And again",
+  "Last one, honest",
+  "Keep it going",
+  "I can't stop",
+  "I can't get enough",
+  "I need more"
 ];

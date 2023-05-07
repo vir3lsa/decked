@@ -2,7 +2,13 @@ import { StoreProvider, ThunkCreator } from "easy-peasy";
 import React, { FunctionComponent, ReactNode, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { firstCompliments, secondCompliments } from "../common/constants";
+import {
+  firstCompliments,
+  mainCongratulations,
+  playAgainLabels,
+  secondCompliments,
+  zerothCompliments
+} from "../common/constants";
 import DragLayer from "../dragLayer";
 import { OnMove, OnUndo, store, useStoreActions, useStoreState } from "../model/storeModel";
 import "./Playmat.css";
@@ -50,8 +56,11 @@ const PlaymatInner: FunctionComponent<Props> = ({
   const resetToInitialState = useStoreActions((store) => store.resetToInitialState);
 
   const [confirmationDisplayed, setConfirmationDisplayed] = useState(false);
+  const [mainCongratulation, setMainCongratulation] = useState<string>();
+  const [complimentZero, setComplimentZero] = useState<string>();
   const [complimentOne, setComplimentOne] = useState<string>();
   const [complimentTwo, setComplimentTwo] = useState<string>();
+  const [playAgainLabel, setPlayAgainLabel] = useState<string>();
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
@@ -100,9 +109,12 @@ const PlaymatInner: FunctionComponent<Props> = ({
     }
   }, [setup, cardStacks]);
 
-  if (!complimentOne && !complimentTwo) {
+  if (!complimentOne) {
+    setMainCongratulation(mainCongratulations[Math.floor(Math.random() * mainCongratulations.length)]);
+    setComplimentZero(zerothCompliments[Math.floor(Math.random() * zerothCompliments.length)]);
     setComplimentOne(firstCompliments[Math.floor(Math.random() * firstCompliments.length)]);
     setComplimentTwo(secondCompliments[Math.floor(Math.random() * secondCompliments.length)]);
+    setPlayAgainLabel(playAgainLabels[Math.floor(Math.random() * playAgainLabels.length)]);
   }
 
   const handleUndo = () => {
@@ -113,6 +125,7 @@ const PlaymatInner: FunctionComponent<Props> = ({
 
   const handleNewGame = () => {
     setConfirmationDisplayed(false);
+    setComplimentOne(undefined);
 
     if (setupHasRun) {
       setSetupHasRun(false);
@@ -149,8 +162,11 @@ const PlaymatInner: FunctionComponent<Props> = ({
       </div>
       {win ? (
         <div className="congrats">
-          <div className="congratsTitle">Congratulations!</div>
-          <div className="congratsMessage">{`You truly are the ${complimentOne} ${complimentTwo}.`}</div>
+          <div className="congratsTitle">{mainCongratulation}</div>
+          <div className="congratsMessage">{`${complimentZero} ${complimentOne} ${complimentTwo}.`}</div>
+          <div className="buttonBar gameOverButtons">
+            <input type="button" value={playAgainLabel} className="button" onClick={handleNewGame} />
+          </div>
         </div>
       ) : (
         <>{children}</>

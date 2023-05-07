@@ -223,6 +223,8 @@ export const store = createStore<StoreModel>({
 
     state.cardStacks = cardStacks;
     state.history = [];
+    state.setupHasRun = false;
+    state.win = false;
   })
 });
 
