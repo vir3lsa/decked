@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# 0.1.6
+
+* 2023-05-09 Stopped cards flickering up and down when hovered over.
+
 # 0.1.5
 
 * 2023-05-06 Further improved game over screen.

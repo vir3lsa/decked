@@ -26,7 +26,7 @@ const CardDragPreview: FunctionComponent<Props> = memo(({ suit, rank, top }) => 
     });
   }, [suit, rank]);
 
-  return <div style={style} className="card" role="img" />;
+  return <div style={style} className="nudgeBox card" role="img" />;
 });
 
 export default CardDragPreview;

@@ -1,24 +1,28 @@
 .card {
     width: 128px;
     height: 180px;
-    position: absolute;
     border-radius: 16px;
     background-size: 1480px auto;
     filter: drop-shadow(-2px -2px 5px #999);
-    transition: margin-top 0.1s ease;
+    transition: filter 0.5s ease;
+}
+
+.nudgeBox {
+    transition: margin-top 0.1s ease, height 0.1s ease;
+    position: absolute;
+    cursor: pointer;
 }
 
 .draggable:hover {
     margin-top: -10px;
+    height: 190px;
 }
 
-.cardHover:hover {
+.draggable:hover .card {
     filter: drop-shadow(0px 0px 5px rgb(93, 16, 217));
-    cursor: pointer;
 }
 
 .stackPreview {
-    position: relative;
     filter: drop-shadow(0px 0px 15px rgb(129, 71, 221));
     cursor: pointer;
 }

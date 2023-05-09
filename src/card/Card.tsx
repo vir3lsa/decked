@@ -25,6 +25,7 @@ interface Props {
 
 const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, stack, stackDragging, canDrag }) => {
   const [style, setStyle] = useState(cardStyle);
+  const [boxStyle, setBoxStyle] = useState<CSSProperties>({});
   const clickMove = useStoreActions((store) => store.clickMove);
   const setDragging = useStoreActions((store) => store.setDragging);
   const card = { id, suit, rank, colour };
@@ -66,20 +67,19 @@ const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, stack, st
       ...cardStyle,
       backgroundImage: `url(${deckImage})`,
       backgroundPosition: `${positionMap[suit][rank].x}px ${positionMap[suit][rank].y}px`,
-      top,
       opacity: isDragging || stackDragging ? 0 : 1
     });
-  }, [suit, rank, top, isDragging, stackDragging]);
+  }, [suit, rank, isDragging, stackDragging]);
+
+  useEffect(() => {
+    setBoxStyle({ top });
+  }, [top]);
 
   return (
-    <div className="cardHover">
-      <div
-        style={style}
-        className={`card ${ableToDrag() ? "draggable" : ""}`}
-        role="img"
-        ref={dragRef}
-        onClick={handleClick}
-      />
+    <div style={boxStyle} className={`nudgeBox ${ableToDrag() ? "draggable" : ""}`} ref={dragRef} onClick={handleClick}>
+      <div className="cardHover">
+        <div style={style} className="card" role="img" />
+      </div>
     </div>
   );
 };
