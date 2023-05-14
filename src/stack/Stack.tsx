@@ -1,4 +1,4 @@
-import React, { CSSProperties, FunctionComponent, useEffect } from "react";
+import React, { CSSProperties, FunctionComponent, useEffect, useMemo, useRef } from "react";
 import { v4 as uuid4 } from "uuid";
 import { useStoreActions, useStoreState } from "../model";
 import Card from "../card";
@@ -6,7 +6,6 @@ import { useDrop } from "react-dnd";
 import ItemTypes from "../dnd";
 import "./Stack.css";
 import { SPREAD_FACTOR } from "../common/constants";
-import { store } from "../model/storeModel";
 
 interface Props {
   name: string;
@@ -41,14 +40,22 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
   const dragMultiple = useStoreState((state) => state.dragMultiple);
   const addStack = useStoreActions((state) => state.addStack);
   const moveCardThunk = useStoreActions((state) => state.moveCardThunk);
+  const animationRef = useRef<HTMLDivElement>(null);
   const canDragFunc = typeof canDrag === "function" ? canDrag : () => canDrag;
   const canDropFunc = typeof canDrop === "function" ? canDrop : () => canDrop;
 
   const topCard = cardsInStack?.[cardsInStack.length - 1];
 
   useEffect(() => {
-    if (!cardsInStack) {
-      addStack({ name, cards: initialContents === "fullDeck" ? createDeck() : [], canDrop: canDropFunc });
+    if (!cardsInStack && animationRef.current) {
+      const rect = animationRef.current.getBoundingClientRect();
+      addStack({
+        name,
+        cards: initialContents === "fullDeck" ? createDeck() : [],
+        canDrop: canDropFunc,
+        position: { x: rect.left, y: rect.top },
+        spread
+      });
     }
     // Update model with initial contents
   }, [name, initialContents]);
@@ -67,36 +74,38 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
   const draggingIndex = dragMultiple ? cardsInStack?.findIndex((card) => card.isDragging) : -1;
 
   return (
-    <div className="stack" ref={dropRef}>
-      {cardsInStack?.length && spread ? (
-        cardsInStack.map((card, index) => (
+    <div ref={animationRef}>
+      <div className="stack" ref={dropRef}>
+        {cardsInStack?.length && spread ? (
+          cardsInStack.map((card, index) => (
+            <Card
+              key={card.id}
+              id={card.id}
+              suit={card.suit}
+              rank={card.rank}
+              colour={card.colour}
+              top={`${index * SPREAD_FACTOR}px`}
+              stack={name}
+              stackDragging={draggingIndex !== -1 && index > draggingIndex}
+              canDrag={(card) => {
+                return canDrag ? canDragFunc(cardStacks, name, card) : true;
+              }}
+            />
+          ))
+        ) : topCard ? (
           <Card
-            key={card.id}
-            id={card.id}
-            suit={card.suit}
-            rank={card.rank}
-            colour={card.colour}
-            top={`${index * SPREAD_FACTOR}px`}
+            id={topCard.id}
+            suit={topCard.suit}
+            rank={topCard.rank}
+            colour={topCard.colour}
             stack={name}
-            stackDragging={draggingIndex !== -1 && index > draggingIndex}
-            canDrag={(card) => {
-              return canDrag ? canDragFunc(cardStacks, name, card) : true;
-            }}
+            stackDragging={false}
+            canDrag={(card) => (canDrag ? canDragFunc(cardStacks, name, card) : true)}
           />
-        ))
-      ) : topCard ? (
-        <Card
-          id={topCard.id}
-          suit={topCard.suit}
-          rank={topCard.rank}
-          colour={topCard.colour}
-          stack={name}
-          stackDragging={false}
-          canDrag={(card) => (canDrag ? canDragFunc(cardStacks, name, card) : true)}
-        />
-      ) : (
-        <div className="empty" />
-      )}
+        ) : (
+          <div className="empty" />
+        )}
+      </div>
     </div>
   );
 };

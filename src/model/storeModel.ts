@@ -1,8 +1,15 @@
-import { action, Action, createStore, createTypedHooks, thunk, Thunk, ThunkCreator } from "easy-peasy";
+import { action, Action, ActionCreator, createStore, createTypedHooks, thunk, Thunk, ThunkCreator } from "easy-peasy";
+import { ON_MOVE_DELAY_MILLIS, SLIDE_DELAY_MILLIS, SLIDE_MILLIS } from "../common/constants";
 
 export type MoveCardThunk = ThunkCreator<MoveCardThunkPayload>;
 export type UndoThunk = ThunkCreator;
-export type OnMove = (cardStacks: CardStacks, move: Move, moveCardThunk: MoveCardThunk) => void;
+export type SetSlideAction = ActionCreator<SlidePayload>;
+export type OnMove = (
+  cardStacks: CardStacks,
+  move: Move,
+  moveCardThunk: MoveCardThunk,
+  setSlide: SetSlideAction
+) => void;
 export type OnUndo = (cardStacks: CardStacks, history: Move[], undoThunk: UndoThunk) => void;
 
 export interface StoreModel {
@@ -16,7 +23,13 @@ export interface StoreModel {
   onMove?: OnMove;
   onUndo?: OnUndo;
   dragMultiple?: boolean;
+  slidingCard?: ICard;
+  slidingToStack?: IStack;
+  animating: boolean;
+  onSlideStart?: VoidCallback;
+  onSlideEnd?: VoidCallback;
   addStack: Action<StoreModel, IStack>;
+  addCardToStack: Action<StoreModel, AddCardToStackPayload>;
   moveCard: Action<StoreModel, MoveCardPayload>;
   moveCardThunk: Thunk<StoreModel, MoveCardThunkPayload>;
   setSetupHasRun: Action<StoreModel, boolean>;
@@ -31,6 +44,9 @@ export interface StoreModel {
   setDragMultiple: Action<StoreModel, boolean>;
   recordInitialCardStacks: Action<StoreModel>;
   resetToInitialState: Action<StoreModel>;
+  recordPosition: Action<StoreModel, RecordPositionPayload>;
+  setSlide: Action<StoreModel, SlidePayload>;
+  setOnSlideEnd: Action<StoreModel, VoidCallback>;
 }
 
 const findCard = (cardId: string, cardStacks: CardStacks): ICard => {
@@ -75,12 +91,18 @@ export const store = createStore<StoreModel>({
   win: false,
   history: [],
   compareMoveStacks: () => 0,
+  animating: false,
   addStack: action((state, stack) => {
     state.cardStacks[stack.name] = stack;
   }),
+  addCardToStack: action((state, { card, stackName }) => {
+    state.cardStacks[stackName].cards.push(card);
+  }),
   moveCard: action((state, { card, move }) => {
-    // Add the card to the new stack
-    state.cardStacks[move.toStack].cards.push(card);
+    // Add the card to the new stack if we're not in an animation
+    if (!state.animating) {
+      state.cardStacks[move.toStack].cards.push(card);
+    }
 
     // Remove the card from the old stack
     state.cardStacks[move.fromStack].cards.splice(move.fromIndex, 1);
@@ -120,8 +142,17 @@ export const store = createStore<StoreModel>({
     actions.moveCard({ card: payload.card, move });
 
     if (state.setupHasRun) {
-      // Trigger onMove callback.
-      state.onMove?.(helpers.getState().cardStacks, move, actions.moveCardThunk);
+      // Add card to new stack, stop animation and trigger onMove callback.
+      actions.setOnSlideEnd(() => {
+        actions.addCardToStack({ card: payload.card, stackName: payload.toStack });
+        setTimeout(() => {
+          actions.setSlide({ animating: false, slidingCard: undefined, slidingToStack: undefined });
+        }, SLIDE_DELAY_MILLIS);
+        setTimeout(
+          () => state.onMove?.(helpers.getState().cardStacks, move, actions.moveCardThunk, actions.setSlide),
+          ON_MOVE_DELAY_MILLIS
+        );
+      });
     }
   }),
   setSetupHasRun: action((state, setupHasRun) => {
@@ -178,10 +209,15 @@ export const store = createStore<StoreModel>({
     }
 
     availableStacks.sort(state.compareMoveStacks);
+    const toStack = availableStacks[0];
 
-    actions.moveCardThunk({
-      card,
-      toStack: availableStacks[0].name
+    // Animate the move.
+    const slidingCard = findCard(card.id, state.cardStacks);
+    actions.setSlide({
+      animating: true,
+      slidingCard,
+      slidingToStack: toStack,
+      onSlideStart: () => actions.moveCardThunk({ card, toStack: toStack.name })
     });
   }),
   setCompareMoveStacks: action((state, compareMoveStacks) => {
@@ -225,6 +261,26 @@ export const store = createStore<StoreModel>({
     state.history = [];
     state.setupHasRun = false;
     state.win = false;
+  }),
+  recordPosition: action((state, payload) => {
+    const card = findCard(payload.id, state.cardStacks);
+
+    if (!card.position) {
+      card.position = payload.position;
+    } else {
+      card.position.x = payload.position.x;
+      card.position.y = payload.position.y;
+    }
+  }),
+  setSlide: action((state, { animating, slidingCard, slidingToStack, onSlideStart, onSlideEnd }) => {
+    state.animating = animating;
+    state.slidingCard = slidingCard;
+    state.slidingToStack = slidingToStack;
+    state.onSlideStart = onSlideStart;
+    state.onSlideEnd = onSlideEnd;
+  }),
+  setOnSlideEnd: action((state, onSlideEnd) => {
+    state.onSlideEnd = onSlideEnd;
   })
 });
 

@@ -1,4 +1,4 @@
-import React, { CSSProperties, FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { CSSProperties, FunctionComponent, memo, useEffect, useMemo, useRef, useState } from "react";
 import { DragSourceMonitor, useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import deckImage from "../../assets/Macrovector/deck.jpg";
@@ -23,11 +23,14 @@ interface Props {
   canDrag?: (card: ICard) => boolean;
 }
 
+// TODO prevent canDrag being different every time so memo() will work.
 const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, stack, stackDragging, canDrag }) => {
   const [style, setStyle] = useState(cardStyle);
   const [boxStyle, setBoxStyle] = useState<CSSProperties>({});
   const clickMove = useStoreActions((store) => store.clickMove);
   const setDragging = useStoreActions((store) => store.setDragging);
+  const recordPosition = useStoreActions((store) => store.recordPosition);
+  const animationRef = useRef<HTMLDivElement>(null);
   const card = { id, suit, rank, colour };
 
   const ableToDrag = useMemo(() => () => canDrag ? canDrag(card) : true, [id, suit, rank, canDrag]);
@@ -58,6 +61,11 @@ const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, stack, st
     const canMove = canDrag ? canDrag(card) : true;
 
     if (canMove) {
+      if (animationRef.current) {
+        const rect = animationRef.current.getBoundingClientRect();
+        recordPosition({ id, position: { x: rect.left, y: rect.top } });
+      }
+
       clickMove(card);
     }
   };
@@ -75,10 +83,19 @@ const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, stack, st
     setBoxStyle({ top });
   }, [top]);
 
+  useEffect(() => {
+    if (animationRef.current) {
+      const rect = animationRef.current.getBoundingClientRect();
+      recordPosition({ id, position: { x: rect.left, y: rect.top } });
+    }
+  });
+
+  // console.log(`${rank} of ${suit} rendering`);
+
   return (
     <div style={boxStyle} className={`nudgeBox ${ableToDrag() ? "draggable" : ""}`} ref={dragRef} onClick={handleClick}>
       <div className="cardHover">
-        <div style={style} className="card" role="img" />
+        <div style={style} className="card" role="img" ref={animationRef} />
       </div>
     </div>
   );

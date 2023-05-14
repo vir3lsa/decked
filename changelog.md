@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# Unreleased
+
+* 2023-05-14 Added some card slide animations.
+
 # 0.1.6
 
 * 2023-05-09 Stopped cards flickering up and down when hovered over.

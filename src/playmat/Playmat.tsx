@@ -2,6 +2,7 @@ import { StoreProvider, ThunkCreator } from "easy-peasy";
 import React, { FunctionComponent, ReactNode, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import AnimationLayer from "../animationLayer";
 import {
   firstCompliments,
   mainCongratulations,
@@ -183,6 +184,7 @@ const Playmat: FunctionComponent<Props> = ({ dragMultiple, children, ...innerArg
           {children}
         </PlaymatInner>
         <DragLayer dragMultiple={dragMultiple} />
+        <AnimationLayer />
       </DndProvider>
     </StoreProvider>
   );
