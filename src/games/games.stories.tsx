@@ -46,7 +46,7 @@ const findStack = (cardStacks: CardStacks, cardId: string): [IStack, number] => 
       return;
     }
 
-    const indexOfCard = stack.cards.findIndex((card) => card.id === cardId);
+    const indexOfCard = stack.cards.indexOf(cardId);
 
     if (indexOfCard > -1) {
       fromStack = stack;
@@ -61,9 +61,9 @@ const findStack = (cardStacks: CardStacks, cardId: string): [IStack, number] => 
   return [fromStack, fromIndex];
 };
 
-const canDrag = (cardStacks: CardStacks, stackName: string, card: ICard) => {
+const canDrag = (cards: CardMap, cardStacks: CardStacks, stackName: string, card: ICard) => {
   const cardsInStack = cardStacks[stackName].cards;
-  const index = cardsInStack.findIndex((cardInStack) => cardInStack.id === card.id);
+  const index = cardsInStack.indexOf(card.id);
   const isTopCard = index === cardsInStack.length - 1;
 
   // If it's the top card then we can definitely drag it.
@@ -73,8 +73,8 @@ const canDrag = (cardStacks: CardStacks, stackName: string, card: ICard) => {
 
   // If not, we need to see whether it's part of a sequence.
   for (let i = index + 1; i < cardsInStack.length; i++) {
-    const nextCard = cardsInStack[i];
-    const previousCard = cardsInStack[i - 1];
+    const nextCard = cards[cardsInStack[i]];
+    const previousCard = cards[cardsInStack[i - 1]];
 
     if (nextCard.colour === previousCard.colour || nextCard.rank !== previousCard.rank - 1) {
       // It's not part of a sequence, so it can't be dragged.
@@ -85,20 +85,20 @@ const canDrag = (cardStacks: CardStacks, stackName: string, card: ICard) => {
   return true;
 };
 
-const canDropOnSpace = (cardStacks: CardStacks, stackName: string, card: ICard) => {
+const canDropOnSpace = (_: CardMap, cardStacks: CardStacks, stackName: string, card: ICard) => {
   const [fromStack, fromIndex] = findStack(cardStacks, card.id);
   const movingSequence = fromIndex < fromStack.cards.length - 1;
   return cardStacks[stackName].cards.length < 1 && !movingSequence;
 };
-const canDropOnSuit = (cardStacks: CardStacks, stackName: string, card: ICard) => {
+const canDropOnSuit = (cardMap: CardMap, cardStacks: CardStacks, stackName: string, card: ICard) => {
   const [fromStack, fromIndex] = findStack(cardStacks, card.id);
   const movingSequence = fromIndex < fromStack.cards.length - 1;
   const cards = cardStacks[stackName].cards;
-  const lastCard = cards[cards.length - 1];
+  const lastCard = cardMap[cards[cards.length - 1]];
   const canDrop = (!lastCard && card.rank === 1) || (lastCard?.suit === card.suit && lastCard?.rank === card.rank - 1);
   return canDrop && !movingSequence;
 };
-const canDropOnSpread = (cardStacks: CardStacks, stackName: string, card: ICard) => {
+const canDropOnSpread = (cardMap: CardMap, cardStacks: CardStacks, stackName: string, card: ICard) => {
   const [fromStack, fromIndex] = findStack(cardStacks, card.id);
   const movingSequence = fromIndex < fromStack.cards.length - 1;
 
@@ -119,7 +119,7 @@ const canDropOnSpread = (cardStacks: CardStacks, stackName: string, card: ICard)
   }
 
   const cards = cardStacks[stackName].cards;
-  const lastCard = cards[cards.length - 1];
+  const lastCard = cardMap[cards[cards.length - 1]];
   const canDrop = !lastCard || (card.colour !== lastCard.colour && lastCard.rank === card.rank + 1);
   return canDrop;
 };
@@ -213,7 +213,7 @@ export const Emscell: Story = {
     },
     isWin,
     compareMoveStacks,
-    onMove: (cardStacks, move, moveCardThunk, setSlide) => {
+    onMove: (cards, cardStacks, move, moveCardThunk, setSlide) => {
       const fromStackCards = cardStacks[move.fromStack].cards;
 
       if (move.fromIndex < fromStackCards.length) {
@@ -240,7 +240,7 @@ export const Emscell: Story = {
           return;
         }
         // Look at the last card of the stack.
-        const candidate = playStack.cards.length && playStack.cards[playStack.cards.length - 1];
+        const candidate = playStack.cards.length && cards[playStack.cards[playStack.cards.length - 1]];
 
         if (!candidate) {
           // If the stack's empty, move on.
@@ -251,7 +251,7 @@ export const Emscell: Story = {
         const stackWithDroppableCard = playStacks
           .filter((stack) => stack.name !== playStack.name)
           .find((stack) => {
-            const topCard = stack.cards[stack.cards.length - 1];
+            const topCard = cards[stack.cards[stack.cards.length - 1]];
 
             if (topCard && topCard.colour !== candidate.colour && topCard.rank === candidate.rank - 1) {
               // This card could drop on the candidate, so it's a match.
@@ -265,7 +265,7 @@ export const Emscell: Story = {
         }
 
         const availableSuitStack = suitStacks.find((suitStack) => {
-          const lastSuitCard = suitStack.cards.length && suitStack.cards[suitStack.cards.length - 1];
+          const lastSuitCard = suitStack.cards.length && cards[suitStack.cards[suitStack.cards.length - 1]];
 
           if (lastSuitCard && lastSuitCard.suit === candidate.suit && lastSuitCard.rank === candidate.rank - 1) {
             return true;
@@ -285,9 +285,9 @@ export const Emscell: Story = {
         // moveCardThunk({ card: cardToMove, toStack: destinationStack.name });
         setSlide({
           animating: true,
-          slidingCard: cardToMove,
+          slidingCard: cardToMove.id,
           slidingToStack: destinationStack,
-          onSlideStart: () => moveCardThunk({ card: cardToMove!, toStack: destinationStack!.name })
+          onSlideStart: () => moveCardThunk({ card: cardToMove!.id, toStack: destinationStack!.name })
         });
       }
     },

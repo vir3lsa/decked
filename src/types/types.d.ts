@@ -17,12 +17,12 @@ interface ICard {
   position?: Position;
 }
 
-type CanDragOrDropFunc = (cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
+type CanDragOrDropFunc = (cards: CardMap, cardStacks: CardStacks, stackName: string, card: ICard) => boolean;
 type CanDragOrDrop = boolean | CanDragOrDropFunc;
 
 interface IStack {
   name: string;
-  cards: ICard[];
+  cards: string[];
   canDrop?: CanDragOrDropFunc;
   position: Position;
   spread: boolean;
@@ -33,12 +33,12 @@ interface CardStacks {
 }
 
 interface MoveCardThunkPayload {
-  card: ICard;
+  card: string;
   toStack: string;
 }
 
 interface MoveCardPayload {
-  card: ICard;
+  card: string;
   move: Move;
 }
 
@@ -68,15 +68,24 @@ interface RecordPositionPayload {
 
 interface SlidePayload {
   animating: boolean;
-  slidingCard?: ICard;
+  slidingCard?: string;
   slidingToStack?: IStack;
   onSlideStart?: VoidCallback;
   onSlideEnd?: VoidCallback;
 }
 
 interface AddCardToStackPayload {
-  card: ICard;
+  card: string;
   stackName: string;
 }
 
 type VoidCallback = () => void;
+
+interface CardMap {
+  [id: string]: ICard;
+}
+
+interface AddStackPayload {
+  stack: IStack;
+  cards?: ICard[];
+}

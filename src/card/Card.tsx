@@ -3,7 +3,7 @@ import { DragSourceMonitor, useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
 import deckImage from "../../assets/Macrovector/deck.jpg";
 import ItemTypes from "../dnd";
-import { useStoreActions } from "../model";
+import { useStoreActions, useStoreState } from "../model";
 import "./Card.css";
 import { positionMap } from "./common";
 
@@ -14,9 +14,6 @@ const cardStyle: CSSProperties = {
 
 interface Props {
   id: string;
-  suit: Suit;
-  rank: Rank;
-  colour: Colour;
   top?: string;
   stack?: string;
   stackDragging?: boolean;
@@ -24,14 +21,15 @@ interface Props {
 }
 
 // TODO prevent canDrag being different every time so memo() will work.
-const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, stack, stackDragging, canDrag }) => {
+const Card: FunctionComponent<Props> = ({ id, top, stack, canDrag }) => {
   const [style, setStyle] = useState(cardStyle);
   const [boxStyle, setBoxStyle] = useState<CSSProperties>({});
+  const card = useStoreState((state) => state.cards[id]);
   const clickMove = useStoreActions((store) => store.clickMove);
   const setDragging = useStoreActions((store) => store.setDragging);
   const recordPosition = useStoreActions((store) => store.recordPosition);
   const animationRef = useRef<HTMLDivElement>(null);
-  const card = { id, suit, rank, colour };
+  const { suit, rank, isDragging: stackDragging } = card;
 
   const ableToDrag = useMemo(() => () => canDrag ? canDrag(card) : true, [id, suit, rank, canDrag]);
 
@@ -66,7 +64,7 @@ const Card: FunctionComponent<Props> = ({ id, suit, rank, colour, top, stack, st
         recordPosition({ id, position: { x: rect.left, y: rect.top } });
       }
 
-      clickMove(card);
+      clickMove(card.id);
     }
   };
 

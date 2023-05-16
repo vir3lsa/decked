@@ -5,7 +5,7 @@ import { useStoreState } from "../model";
 import "./AnimationLayer.css";
 
 const AnimationLayer: FunctionComponent = () => {
-  const slidingCard = useStoreState((state) => state.slidingCard);
+  const slidingCard = useStoreState((state) => state.slidingCardObj);
   const slidingToStack = useStoreState((state) => state.slidingToStack);
   const onSlideStart = useStoreState((state) => state.onSlideStart);
   const onSlideEnd = useStoreState((state) => state.onSlideEnd);

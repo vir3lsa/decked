@@ -1,10 +1,22 @@
-import { action, Action, ActionCreator, createStore, createTypedHooks, thunk, Thunk, ThunkCreator } from "easy-peasy";
+import {
+  action,
+  Action,
+  ActionCreator,
+  computed,
+  Computed,
+  createStore,
+  createTypedHooks,
+  thunk,
+  Thunk,
+  ThunkCreator
+} from "easy-peasy";
 import { ON_MOVE_DELAY_MILLIS, SLIDE_DELAY_MILLIS, SLIDE_MILLIS } from "../common/constants";
 
 export type MoveCardThunk = ThunkCreator<MoveCardThunkPayload>;
 export type UndoThunk = ThunkCreator;
 export type SetSlideAction = ActionCreator<SlidePayload>;
 export type OnMove = (
+  cards: CardMap,
   cardStacks: CardStacks,
   move: Move,
   moveCardThunk: MoveCardThunk,
@@ -13,6 +25,7 @@ export type OnMove = (
 export type OnUndo = (cardStacks: CardStacks, history: Move[], undoThunk: UndoThunk) => void;
 
 export interface StoreModel {
+  cards: CardMap;
   cardStacks: CardStacks;
   initialCardStacks: CardStacks;
   setupHasRun: boolean;
@@ -23,12 +36,13 @@ export interface StoreModel {
   onMove?: OnMove;
   onUndo?: OnUndo;
   dragMultiple?: boolean;
-  slidingCard?: ICard;
+  slidingCard?: string;
   slidingToStack?: IStack;
   animating: boolean;
   onSlideStart?: VoidCallback;
   onSlideEnd?: VoidCallback;
-  addStack: Action<StoreModel, IStack>;
+  slidingCardObj: Computed<StoreModel, ICard | undefined>;
+  addStack: Action<StoreModel, AddStackPayload>;
   addCardToStack: Action<StoreModel, AddCardToStackPayload>;
   moveCard: Action<StoreModel, MoveCardPayload>;
   moveCardThunk: Thunk<StoreModel, MoveCardThunkPayload>;
@@ -36,7 +50,7 @@ export interface StoreModel {
   setIsWin: Action<StoreModel, IsWin>;
   undo: Action<StoreModel>;
   undoThunk: Thunk<StoreModel>;
-  clickMove: Thunk<StoreModel, ICard>;
+  clickMove: Thunk<StoreModel, string>;
   setCompareMoveStacks: Action<StoreModel, StackMoveComparator>;
   setOnMove: Action<StoreModel, OnMove>;
   setOnUndo: Action<StoreModel, OnUndo>;
@@ -49,18 +63,6 @@ export interface StoreModel {
   setOnSlideEnd: Action<StoreModel, VoidCallback>;
 }
 
-const findCard = (cardId: string, cardStacks: CardStacks): ICard => {
-  for (const stack of Object.values(cardStacks)) {
-    const card = stack.cards.find((card) => card.id === cardId);
-
-    if (card) {
-      return card;
-    }
-  }
-
-  throw Error(`Couldn't find card with ID: ${cardId}`);
-};
-
 export const findStack = (cardStacks: CardStacks, cardId: string): [IStack, number] => {
   let fromStack: IStack | undefined, fromIndex: number | undefined;
   Object.values(cardStacks).forEach((stack) => {
@@ -69,7 +71,7 @@ export const findStack = (cardStacks: CardStacks, cardId: string): [IStack, numb
       return;
     }
 
-    const indexOfCard = stack.cards.findIndex((card) => card.id === cardId);
+    const indexOfCard = stack.cards.indexOf(cardId);
 
     if (indexOfCard > -1) {
       fromStack = stack;
@@ -85,6 +87,7 @@ export const findStack = (cardStacks: CardStacks, cardId: string): [IStack, numb
 };
 
 export const store = createStore<StoreModel>({
+  cards: {},
   cardStacks: {},
   initialCardStacks: {},
   setupHasRun: false,
@@ -92,8 +95,11 @@ export const store = createStore<StoreModel>({
   history: [],
   compareMoveStacks: () => 0,
   animating: false,
-  addStack: action((state, stack) => {
+  slidingCardObj: computed((state) => (state.slidingCard ? state.cards[state.slidingCard] : undefined)),
+  addStack: action((state, { stack, cards }) => {
     state.cardStacks[stack.name] = stack;
+    // Add the cards to the model.
+    cards?.forEach((card) => (state.cards[card.id] = card));
   }),
   addCardToStack: action((state, { card, stackName }) => {
     state.cardStacks[stackName].cards.push(card);
@@ -121,16 +127,14 @@ export const store = createStore<StoreModel>({
     const state = helpers.getState();
 
     // Find the card in the old stack
-    let [fromStack, fromIndex] = findStack(state.cardStacks, payload.card.id);
+    let [fromStack, fromIndex] = findStack(state.cardStacks, payload.card);
 
     if (!fromStack || fromIndex === undefined) {
-      throw Error(
-        `Couldn't find card: { id: ${payload.card.id}, suit: ${payload.card.suit}, rank: ${payload.card.rank} }`
-      );
+      throw Error(`Couldn't find card ${payload.card}.`);
     }
 
     const move = {
-      cards: [payload.card.id],
+      cards: [payload.card],
       fromStack: fromStack.name,
       toStack: payload.toStack,
       fromIndex,
@@ -149,7 +153,14 @@ export const store = createStore<StoreModel>({
           actions.setSlide({ animating: false, slidingCard: undefined, slidingToStack: undefined });
         }, SLIDE_DELAY_MILLIS);
         setTimeout(
-          () => state.onMove?.(helpers.getState().cardStacks, move, actions.moveCardThunk, actions.setSlide),
+          () =>
+            state.onMove?.(
+              helpers.getState().cards,
+              helpers.getState().cardStacks,
+              move,
+              actions.moveCardThunk,
+              actions.setSlide
+            ),
           ON_MOVE_DELAY_MILLIS
         );
       });
@@ -165,12 +176,11 @@ export const store = createStore<StoreModel>({
     const lastMove = state.history.pop();
 
     if (lastMove) {
-      const cards = lastMove.cards.map((id) => findCard(id, state.cardStacks));
       const fromStack = state.cardStacks[lastMove.fromStack];
       const toStack = state.cardStacks[lastMove.toStack];
 
-      if (cards && fromStack && toStack) {
-        cards.forEach((card) => {
+      if (lastMove.cards && fromStack && toStack) {
+        lastMove.cards.forEach((card) => {
           toStack.cards.splice(lastMove.toIndex, 1);
           fromStack.cards.splice(lastMove.fromIndex, 0, card);
         });
@@ -191,15 +201,16 @@ export const store = createStore<StoreModel>({
   }),
   clickMove: thunk((actions, card, helpers) => {
     const state = helpers.getState();
-    const [currentStack, cardIndex] = findStack(state.cardStacks, card.id);
+    const [currentStack, cardIndex] = findStack(state.cardStacks, card);
 
     if (!currentStack || cardIndex === undefined) {
-      throw Error(`Couldn't find card ${card.id} in any stack.`);
+      throw Error(`Couldn't find card ${card} in any stack.`);
     }
 
     const availableStacks = Object.values(state.cardStacks).filter((stack) => {
       return (
-        stack.name !== currentStack.name && (stack.canDrop ? stack.canDrop(state.cardStacks, stack.name, card) : true)
+        stack.name !== currentStack.name &&
+        (stack.canDrop ? stack.canDrop(state.cards, state.cardStacks, stack.name, state.cards[card]) : true)
       );
     });
 
@@ -212,10 +223,9 @@ export const store = createStore<StoreModel>({
     const toStack = availableStacks[0];
 
     // Animate the move.
-    const slidingCard = findCard(card.id, state.cardStacks);
     actions.setSlide({
       animating: true,
-      slidingCard,
+      slidingCard: card,
       slidingToStack: toStack,
       onSlideStart: () => actions.moveCardThunk({ card, toStack: toStack.name })
     });
@@ -229,14 +239,26 @@ export const store = createStore<StoreModel>({
   setOnUndo: action((state, onUndo) => {
     state.onUndo = onUndo;
   }),
-  setDragging: action((state, { cardId, stack, dragging }) => {
-    const card = state.cardStacks[stack].cards.find((card) => card.id === cardId);
+  setDragging: action((state, { cardId, dragging, stack }) => {
+    const card = state.cards[cardId];
 
     if (!card) {
-      throw Error(`Couldn't find card ${cardId} in stack ${stack}.`);
+      throw Error(`Couldn't find card ${cardId}.`);
     }
 
     card.isDragging = dragging;
+
+    // Set dragging on any cards on top TODO is this working?
+    if (state.dragMultiple) {
+      const cards = state.cardStacks[stack].cards;
+      cards
+        .map((stackCardId) => state.cards[stackCardId])
+        .forEach((stackCard, index) => {
+          if (index > cards.indexOf(cardId)) {
+            stackCard.isDragging = dragging;
+          }
+        });
+    }
   }),
   setDragMultiple: action((state, dragMultiple) => {
     state.dragMultiple = dragMultiple;
@@ -245,7 +267,7 @@ export const store = createStore<StoreModel>({
     const initialCardStacks: CardStacks = {};
 
     Object.values(state.cardStacks).forEach((stack) => {
-      initialCardStacks[stack.name] = { ...stack, cards: stack.cards.map((card) => ({ ...card })) };
+      initialCardStacks[stack.name] = { ...stack, cards: [...stack.cards] };
     });
 
     state.initialCardStacks = initialCardStacks;
@@ -254,7 +276,7 @@ export const store = createStore<StoreModel>({
     const cardStacks: CardStacks = {};
 
     Object.values(state.initialCardStacks).forEach((stack) => {
-      cardStacks[stack.name] = { ...stack, cards: stack.cards.map((card) => ({ ...card })) };
+      cardStacks[stack.name] = { ...stack, cards: [...stack.cards] };
     });
 
     state.cardStacks = cardStacks;
@@ -263,7 +285,7 @@ export const store = createStore<StoreModel>({
     state.win = false;
   }),
   recordPosition: action((state, payload) => {
-    const card = findCard(payload.id, state.cardStacks);
+    const card = state.cards[payload.id];
 
     if (!card.position) {
       card.position = payload.position;

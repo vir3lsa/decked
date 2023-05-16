@@ -1,5 +1,5 @@
 export const SPREAD_FACTOR = 45;
-export const SLIDE_MILLIS = 1500;
+export const SLIDE_MILLIS = 500;
 export const SLIDE_DELAY_MILLIS = 1;
 export const ON_MOVE_DELAY_MILLIS = 2;
 

@@ -88,9 +88,8 @@ export const CanDrag: Story = {
           name="spread"
           spread
           initialContents="fullDeck"
-          canDrag={(cardStacks, stackName, card) =>
-            cardStacks[stackName].cards.findIndex((cardInStack) => cardInStack.id === card.id) ===
-            cardStacks[stackName].cards.length - 1
+          canDrag={(_, cardStacks, stackName, card) =>
+            cardStacks[stackName].cards.indexOf(card.id) === cardStacks[stackName].cards.length - 1
           }
         />
       </div>
@@ -106,15 +105,15 @@ export const CanDrop: Story = {
           name="notSpread"
           spread={false}
           initialContents="fullDeck"
-          canDrop={(cardStacks, stackName) => cardStacks[stackName].cards.length <= 10}
+          canDrop={(_, cardStacks, stackName) => cardStacks[stackName].cards.length <= 10}
         />
         <Stack
           name="empty"
           spread={false}
           initialContents="empty"
-          canDrop={(_, __, card) => card.suit === "hearts" || card.suit === "diamonds"}
+          canDrop={(_, __, ___, card) => card.suit === "hearts" || card.suit === "diamonds"}
         />
-        <Stack name="spread" spread initialContents="fullDeck" canDrop={(_, __, card) => card.rank > 3} />
+        <Stack name="spread" spread initialContents="fullDeck" canDrop={(_, __, ___, card) => card.rank > 3} />
       </div>
     )
   }
@@ -138,7 +137,7 @@ export const WinFunction: Story = {
   }
 };
 
-const canDrop = (cardStacks: CardStacks, name: string) => cardStacks[name].cards.length < 1;
+const canDrop = (_: CardMap, cardStacks: CardStacks, name: string) => cardStacks[name].cards.length < 1;
 const stackOrder = ["eee", "bbb", "ggg", "ddd", "ccc", "fff"];
 
 export const compareMoveStacks: Story = {

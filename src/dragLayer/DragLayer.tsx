@@ -43,12 +43,13 @@ const DragLayer: FunctionComponent<Props> = ({ dragMultiple = true }) => {
     isDragging: monitor.isDragging()
   }));
 
+  const cardMap = useStoreState((store) => store.cards);
   const cardStacks = useStoreState((store) => store.cardStacks);
   let cards = [item];
 
   if (item && dragMultiple) {
     const [stack, index] = findStack(cardStacks, item.id);
-    cards = stack.cards.slice(index); // Cards from index to the end (may just be one).
+    cards = stack.cards.slice(index).map((card) => cardMap[card]); // Cards from index to the end (may just be one).
   }
 
   if (!isDragging) {
