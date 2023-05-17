@@ -130,6 +130,7 @@ const isWin = (cardStacks: CardStacks) =>
   cardStacks["suit3"].cards.length === 13 &&
   cardStacks["suit4"].cards.length === 13;
 
+// TODO Suits should take precedence even when empty
 const preferredMoveStacks = [
   "suit1",
   "suit2",
@@ -226,7 +227,6 @@ export const Emscell: Story = {
         });
 
         return;
-        // return moveCardThunk({ card: fromStackCards[move.fromIndex], toStack: move.toStack });
       }
 
       const playStacks = Object.values(cardStacks).filter((stack) => !stack.name.startsWith("suit"));
@@ -282,7 +282,6 @@ export const Emscell: Story = {
       });
 
       if (cardToMove && destinationStack) {
-        // moveCardThunk({ card: cardToMove, toStack: destinationStack.name });
         setSlide({
           animating: true,
           slidingCard: cardToMove.id,
