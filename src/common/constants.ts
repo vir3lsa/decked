@@ -1,7 +1,6 @@
 export const SPREAD_FACTOR = 45;
 export const SLIDE_MILLIS = 500;
-export const SLIDE_DELAY_MILLIS = 1;
-export const ON_MOVE_DELAY_MILLIS = 2;
+export const ON_MOVE_DELAY_MILLIS = 50;
 
 export const mainCongratulations = [
   "Congratulations!",
@@ -137,3 +136,5 @@ export const playAgainLabels = [
   "I can't get enough",
   "I need more"
 ];
+
+export const undoKeys = ["z", "Z", "u", "U"];

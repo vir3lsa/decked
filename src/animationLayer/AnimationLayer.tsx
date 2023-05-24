@@ -1,6 +1,6 @@
 import React, { CSSProperties, FunctionComponent, TransitionEvent, useEffect, useMemo, useRef, useState } from "react";
 import { DragPreview } from "../card";
-import { SLIDE_DELAY_MILLIS, SLIDE_MILLIS, SPREAD_FACTOR } from "../common/constants";
+import { SLIDE_MILLIS, SPREAD_FACTOR } from "../common/constants";
 import { useStoreState } from "../model";
 import "./AnimationLayer.css";
 
@@ -54,7 +54,6 @@ const AnimationLayer: FunctionComponent = () => {
     () => (event: TransitionEvent<HTMLDivElement>) => {
       if (event.propertyName === "transform") {
         onSlideEnd?.();
-        setTimeout(() => setStyle({}), SLIDE_DELAY_MILLIS);
       }
     },
     [onSlideEnd]

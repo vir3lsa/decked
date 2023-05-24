@@ -166,7 +166,10 @@ export const OnMove: Story = {
         <Stack name="spread2" spread initialContents="fullDeck" />
       </div>
     ),
-    onMove: () => window.alert("Moved a card")
+    onMove: () => {
+      window.alert("Moved a card");
+      return false;
+    }
   }
 };
 

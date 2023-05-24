@@ -8,6 +8,7 @@ import {
   mainCongratulations,
   playAgainLabels,
   secondCompliments,
+  undoKeys,
   zerothCompliments
 } from "../common/constants";
 import DragLayer from "../dragLayer";
@@ -52,7 +53,6 @@ const PlaymatInner: FunctionComponent<Props> = ({
   const setOnMove = useStoreActions((store) => store.setOnMove);
   const setOnUndo = useStoreActions((store) => store.setOnUndo);
   const setDragMultiple = useStoreActions((store) => store.setDragMultiple);
-  const undo = useStoreActions((store) => store.undoThunk);
   const recordInitialCardStacks = useStoreActions((store) => store.recordInitialCardStacks);
   const resetToInitialState = useStoreActions((store) => store.resetToInitialState);
 
@@ -65,7 +65,7 @@ const PlaymatInner: FunctionComponent<Props> = ({
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
-      if (event.key === "z" || event.key === "u") {
+      if (undoKeys.includes(event.key)) {
         undoThunk();
       }
     };
@@ -120,7 +120,7 @@ const PlaymatInner: FunctionComponent<Props> = ({
 
   const handleUndo = () => {
     if (!onUndo || storeOnUndo) {
-      undo();
+      undoThunk();
     }
   };
 

@@ -10,7 +10,7 @@ import {
   Thunk,
   ThunkCreator
 } from "easy-peasy";
-import { ON_MOVE_DELAY_MILLIS, SLIDE_DELAY_MILLIS, SLIDE_MILLIS } from "../common/constants";
+import { ON_MOVE_DELAY_MILLIS } from "../common/constants";
 
 export type MoveCardThunk = ThunkCreator<MoveCardThunkPayload>;
 export type UndoThunk = ThunkCreator;
@@ -21,7 +21,7 @@ export type OnMove = (
   move: Move,
   moveCardThunk: MoveCardThunk,
   setSlide: SetSlideAction
-) => void;
+) => boolean;
 export type OnUndo = (cardStacks: CardStacks, history: Move[], undoThunk: UndoThunk) => void;
 
 export interface StoreModel {
@@ -61,6 +61,7 @@ export interface StoreModel {
   recordPosition: Action<StoreModel, RecordPositionPayload>;
   setSlide: Action<StoreModel, SlidePayload>;
   setOnSlideEnd: Action<StoreModel, VoidCallback>;
+  setAnimating: Action<StoreModel, boolean>;
 }
 
 export const findStack = (cardStacks: CardStacks, cardId: string): [IStack, number] => {
@@ -150,19 +151,21 @@ export const store = createStore<StoreModel>({
       actions.setOnSlideEnd(() => {
         actions.addCardToStack({ card: payload.card, stackName: payload.toStack });
         setTimeout(() => {
-          actions.setSlide({ animating: false, slidingCard: undefined, slidingToStack: undefined });
-        }, SLIDE_DELAY_MILLIS);
-        setTimeout(
-          () =>
-            state.onMove?.(
-              helpers.getState().cards,
-              helpers.getState().cardStacks,
-              move,
-              actions.moveCardThunk,
-              actions.setSlide
-            ),
-          ON_MOVE_DELAY_MILLIS
-        );
+          actions.setSlide({ animating: true, slidingCard: undefined, slidingToStack: undefined });
+        });
+        setTimeout(() => {
+          const anotherMove = state.onMove?.(
+            helpers.getState().cards,
+            helpers.getState().cardStacks,
+            move,
+            actions.moveCardThunk,
+            actions.setSlide
+          );
+
+          if (!anotherMove) {
+            actions.setAnimating(false);
+          }
+        }, ON_MOVE_DELAY_MILLIS);
       });
     }
   }),
@@ -191,6 +194,11 @@ export const store = createStore<StoreModel>({
   }),
   undoThunk: thunk((actions, _, helpers) => {
     let state = helpers.getState();
+
+    if (state.animating) {
+      return;
+    }
+
     const lastMove = state.history[state.history.length - 1];
 
     if (lastMove) {
@@ -303,6 +311,9 @@ export const store = createStore<StoreModel>({
   }),
   setOnSlideEnd: action((state, onSlideEnd) => {
     state.onSlideEnd = onSlideEnd;
+  }),
+  setAnimating: action((state, animating) => {
+    state.animating = animating;
   })
 });
 

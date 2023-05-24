@@ -226,7 +226,7 @@ export const Emscell: Story = {
           onSlideStart: () => moveCardThunk({ card: fromStackCards[move.fromIndex], toStack: move.toStack })
         });
 
-        return;
+        return true;
       }
 
       const playStacks = Object.values(cardStacks).filter((stack) => !stack.name.startsWith("suit"));
@@ -288,7 +288,11 @@ export const Emscell: Story = {
           slidingToStack: destinationStack,
           onSlideStart: () => moveCardThunk({ card: cardToMove!.id, toStack: destinationStack!.name })
         });
+
+        return true;
       }
+
+      return false;
     },
     onUndo: (_, history, undoThunk) => {
       setTimeout(() => {

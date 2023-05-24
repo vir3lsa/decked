@@ -25,13 +25,17 @@ const Card: FunctionComponent<Props> = ({ id, top, stack, canDrag }) => {
   const [style, setStyle] = useState(cardStyle);
   const [boxStyle, setBoxStyle] = useState<CSSProperties>({});
   const card = useStoreState((state) => state.cards[id]);
+  const animating = useStoreState((state) => state.animating);
   const clickMove = useStoreActions((store) => store.clickMove);
   const setDragging = useStoreActions((store) => store.setDragging);
   const recordPosition = useStoreActions((store) => store.recordPosition);
   const animationRef = useRef<HTMLDivElement>(null);
   const { suit, rank, isDragging: stackDragging } = card;
 
-  const ableToDrag = useMemo(() => () => canDrag ? canDrag(card) : true, [id, suit, rank, canDrag]);
+  const ableToDrag = useMemo(
+    () => () => canDrag ? canDrag(card) && !animating : !animating,
+    [id, suit, rank, canDrag, animating]
+  );
 
   const [{ isDragging }, dragRef, previewRef] = useDrag(
     () => ({
@@ -58,7 +62,7 @@ const Card: FunctionComponent<Props> = ({ id, top, stack, canDrag }) => {
   const handleClick = () => {
     const canMove = canDrag ? canDrag(card) : true;
 
-    if (canMove) {
+    if (canMove && !animating) {
       if (animationRef.current) {
         const rect = animationRef.current.getBoundingClientRect();
         recordPosition({ id, position: { x: rect.left, y: rect.top } });
@@ -92,9 +96,7 @@ const Card: FunctionComponent<Props> = ({ id, top, stack, canDrag }) => {
 
   return (
     <div style={boxStyle} className={`nudgeBox ${ableToDrag() ? "draggable" : ""}`} ref={dragRef} onClick={handleClick}>
-      <div className="cardHover">
-        <div style={style} className="card" role="img" ref={animationRef} />
-      </div>
+      <div style={style} className="card" role="img" ref={animationRef} />
     </div>
   );
 };
