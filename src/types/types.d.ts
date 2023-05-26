@@ -66,10 +66,13 @@ interface RecordPositionPayload {
   position: Position;
 }
 
+type SlideType = "fast" | "slow";
+
 interface SlidePayload {
   animating: boolean;
   slidingCard?: string;
   slidingToStack?: IStack;
+  slideType?: SlideType;
   onSlideStart?: VoidCallback;
   onSlideEnd?: VoidCallback;
 }

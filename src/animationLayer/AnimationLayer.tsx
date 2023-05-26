@@ -1,26 +1,29 @@
 import React, { CSSProperties, FunctionComponent, TransitionEvent, useEffect, useMemo, useRef, useState } from "react";
 import { DragPreview } from "../card";
-import { SLIDE_MILLIS, SPREAD_FACTOR } from "../common/constants";
+import { SLIDE_FAST_MILLIS, SLIDE_MILLIS, SPREAD_FACTOR } from "../common/constants";
 import { useStoreState } from "../model";
 import "./AnimationLayer.css";
 
 const AnimationLayer: FunctionComponent = () => {
   const slidingCard = useStoreState((state) => state.slidingCardObj);
   const slidingToStack = useStoreState((state) => state.slidingToStack);
+  const slideType = useStoreState((state) => state.slideType);
   const onSlideStart = useStoreState((state) => state.onSlideStart);
   const onSlideEnd = useStoreState((state) => state.onSlideEnd);
   const [style, setStyle] = useState<CSSProperties>({});
   const [trigger, setTrigger] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
   const toCards = slidingToStack?.cards;
-  let x = 0,
-    y = 0;
+  const slideTime = slideType === "fast" ? SLIDE_FAST_MILLIS : SLIDE_MILLIS;
+
+  let x = 0;
+  let y = 0;
 
   useEffect(() => {
     setStyle(
       slidingCard
         ? {
-            transition: `transform ${SLIDE_MILLIS}ms ease`,
+            transition: `transform ${slideTime}ms ease`,
             left: `${slidingCard.position?.x || 0}px`,
             top: `${slidingCard.position?.y || 0}px`,
             transform: "translate(0, 0)"
@@ -41,7 +44,7 @@ const AnimationLayer: FunctionComponent = () => {
       }
 
       setStyle({
-        transition: `transform ${SLIDE_MILLIS}ms ease`,
+        transition: `transform ${slideTime}ms ease`,
         left: `${slidingCard.position?.x || 0}px`,
         top: `${slidingCard.position?.y || 0}px`,
         transform: `translate(${x}px, ${y}px)`

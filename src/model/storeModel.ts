@@ -38,6 +38,7 @@ export interface StoreModel {
   dragMultiple?: boolean;
   slidingCard?: string;
   slidingToStack?: IStack;
+  slideType?: SlideType;
   animating: boolean;
   onSlideStart?: VoidCallback;
   onSlideEnd?: VoidCallback;
@@ -235,6 +236,7 @@ export const store = createStore<StoreModel>({
       animating: true,
       slidingCard: card,
       slidingToStack: toStack,
+      slideType: "slow",
       onSlideStart: () => actions.moveCardThunk({ card, toStack: toStack.name })
     });
   }),
@@ -302,10 +304,11 @@ export const store = createStore<StoreModel>({
       card.position.y = payload.position.y;
     }
   }),
-  setSlide: action((state, { animating, slidingCard, slidingToStack, onSlideStart, onSlideEnd }) => {
+  setSlide: action((state, { animating, slidingCard, slidingToStack, slideType, onSlideStart, onSlideEnd }) => {
     state.animating = animating;
     state.slidingCard = slidingCard;
     state.slidingToStack = slidingToStack;
+    state.slideType = slideType;
     state.onSlideStart = onSlideStart;
     state.onSlideEnd = onSlideEnd;
   }),

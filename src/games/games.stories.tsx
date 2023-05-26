@@ -223,6 +223,7 @@ export const Emscell: Story = {
           animating: true,
           slidingCard: fromStackCards[move.fromIndex],
           slidingToStack: cardStacks[move.toStack],
+          slideType: "fast",
           onSlideStart: () => moveCardThunk({ card: fromStackCards[move.fromIndex], toStack: move.toStack })
         });
 
@@ -286,6 +287,7 @@ export const Emscell: Story = {
           animating: true,
           slidingCard: cardToMove.id,
           slidingToStack: destinationStack,
+          slideType: "fast",
           onSlideStart: () => moveCardThunk({ card: cardToMove!.id, toStack: destinationStack!.name })
         });
 
