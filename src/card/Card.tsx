@@ -65,7 +65,7 @@ const Card: FunctionComponent<Props> = ({ id, top, stack, canDrag }) => {
     if (canMove && !animating) {
       if (animationRef.current) {
         const rect = animationRef.current.getBoundingClientRect();
-        recordPosition({ id, position: { x: rect.left, y: rect.top } });
+        recordPosition({ id, position: { x: rect.left + window.scrollX, y: rect.top + window.scrollY } });
       }
 
       clickMove(card.id);
@@ -88,7 +88,7 @@ const Card: FunctionComponent<Props> = ({ id, top, stack, canDrag }) => {
   useEffect(() => {
     if (animationRef.current) {
       const rect = animationRef.current.getBoundingClientRect();
-      recordPosition({ id, position: { x: rect.left, y: rect.top } });
+      recordPosition({ id, position: { x: rect.left + window.scrollX, y: rect.top + window.scrollY } });
     }
   });
 
