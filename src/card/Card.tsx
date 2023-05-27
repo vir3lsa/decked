@@ -46,7 +46,7 @@ const Card: FunctionComponent<Props> = ({ id, top, stack, canDrag }) => {
         isDragging: monitor.isDragging()
       })
     }),
-    [id, suit, rank, canDrag]
+    [id, suit, rank, ableToDrag]
   );
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const Card: FunctionComponent<Props> = ({ id, top, stack, canDrag }) => {
     if (stack) {
       setDragging({ cardId: id, dragging: isDragging, stack });
     }
-  }, [isDragging, stack]);
+  }, [isDragging, stack, id]);
 
   const handleClick = () => {
     const canMove = canDrag ? canDrag(card) : true;

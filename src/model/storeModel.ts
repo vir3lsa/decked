@@ -107,8 +107,8 @@ export const store = createStore<StoreModel>({
     state.cardStacks[stackName].cards.push(card);
   }),
   moveCard: action((state, { card, move }) => {
-    // Add the card to the new stack if we're not in an animation
-    if (!state.animating) {
+    // Add the card to the new stack if we're doing initial setup
+    if (!state.setupHasRun) {
       state.cardStacks[move.toStack].cards.push(card);
     }
 
@@ -148,8 +148,7 @@ export const store = createStore<StoreModel>({
     actions.moveCard({ card: payload.card, move });
 
     if (state.setupHasRun) {
-      // Add card to new stack, stop animation and trigger onMove callback.
-      actions.setOnSlideEnd(() => {
+      const finishMoveCard = () => {
         actions.addCardToStack({ card: payload.card, stackName: payload.toStack });
         setTimeout(() => {
           actions.setSlide({ animating: true, slidingCard: undefined, slidingToStack: undefined });
@@ -167,7 +166,15 @@ export const store = createStore<StoreModel>({
             actions.setAnimating(false);
           }
         }, ON_MOVE_DELAY_MILLIS);
-      });
+      };
+
+      // Add card to new stack, stop animation and trigger onMove callback.
+      if (state.animating) {
+        actions.setOnSlideEnd(finishMoveCard);
+      } else {
+        // If we're dragging (not animating) finish straight away.
+        finishMoveCard();
+      }
     }
   }),
   setSetupHasRun: action((state, setupHasRun) => {
