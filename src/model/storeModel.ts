@@ -49,6 +49,7 @@ export interface StoreModel {
   moveCardThunk: Thunk<StoreModel, MoveCardThunkPayload>;
   setSetupHasRun: Action<StoreModel, boolean>;
   setIsWin: Action<StoreModel, IsWin>;
+  setWin: Action<StoreModel, boolean>;
   undo: Action<StoreModel>;
   undoThunk: Thunk<StoreModel>;
   clickMove: Thunk<StoreModel, string>;
@@ -115,11 +116,6 @@ export const store = createStore<StoreModel>({
     // Remove the card from the old stack
     state.cardStacks[move.fromStack].cards.splice(move.fromIndex, 1);
 
-    // Check the win condition
-    if (state.isWin && state.isWin(state.cardStacks)) {
-      state.win = true;
-    }
-
     if (state.setupHasRun) {
       // Record the move
       state.history.push(move);
@@ -150,9 +146,16 @@ export const store = createStore<StoreModel>({
     if (state.setupHasRun) {
       const finishMoveCard = () => {
         actions.addCardToStack({ card: payload.card, stackName: payload.toStack });
+
+        // Check the win condition
+        if (state.isWin?.(helpers.getState().cardStacks)) {
+          actions.setWin(true);
+        }
+
         setTimeout(() => {
           actions.setSlide({ animating: true, slidingCard: undefined, slidingToStack: undefined });
         });
+
         setTimeout(() => {
           const anotherMove = state.onMove?.(
             helpers.getState().cards,
@@ -324,6 +327,9 @@ export const store = createStore<StoreModel>({
   }),
   setAnimating: action((state, animating) => {
     state.animating = animating;
+  }),
+  setWin: action((state, win) => {
+    state.win = win;
   })
 });
 
