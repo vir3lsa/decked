@@ -138,20 +138,6 @@ const canDropOnSpread = (cardMap, cardStacks, stackName, card) => {
 };
 
 const onMove = (cards, cardStacks, move, moveCardThunk, setSlide) => {
-  const fromStackCards = cardStacks[move.fromStack].cards;
-
-  if (move.fromIndex < fromStackCards.length) {
-    // Wasn't moved from top of stack, so moving a sequence. Now move the next card in the sequence.
-    setSlide({
-      animating: true,
-      slidingCard: fromStackCards[move.fromIndex],
-      slidingToStack: cardStacks[move.toStack],
-      onSlideStart: () => moveCardThunk({ card: fromStackCards[move.fromIndex], toStack: move.toStack })
-    });
-
-    return;
-  }
-
   const playStacks = Object.values(cardStacks).filter((stack) => !stack.name.startsWith("suit"));
   const suitStacks = Object.values(cardStacks).filter((stack) => stack.name.startsWith("suit"));
 
@@ -207,22 +193,12 @@ const onMove = (cards, cardStacks, move, moveCardThunk, setSlide) => {
   if (cardToMove && destinationStack) {
     setSlide({
       animating: true,
-      slidingCard: cardToMove.id,
+      slidingCards: [cardToMove.id],
       slidingToStack: destinationStack,
+      slideType: "fast",
       onSlideStart: () => moveCardThunk({ card: cardToMove.id, toStack: destinationStack.name })
     });
   }
-};
-
-const onUndo = (_, history, undoThunk) => {
-  setTimeout(() => {
-    const lastMove = history.length && history[history.length - 1];
-
-    if (lastMove && !lastMove.fromTop) {
-      // The last move was part of a sequence, so we need to undo that too.
-      undoThunk();
-    }
-  }, MOVE_TIMEOUT);
 };
 
 const preferredMoveStacks = [
@@ -256,7 +232,7 @@ const compareMoveStacks = (stack1, stack2) => {
 };
 
 const Emscell = () => (
-  <Playmat setup={setup} isWin={isWin} compareMoveStacks={compareMoveStacks} onMove={onMove} onUndo={onUndo}>
+  <Playmat setup={setup} isWin={isWin} compareMoveStacks={compareMoveStacks} onMove={onMove}>
     <>
       <div style={topRowStyle}>
         <span style={spacesStyle}>

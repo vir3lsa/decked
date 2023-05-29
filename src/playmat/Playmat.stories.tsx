@@ -45,7 +45,7 @@ export const SetupFunction: Story = {
         <Stack name="d" spread initialContents="empty" />
       </div>
     ),
-    setup: (cardStacks, moveCard) => {
+    setup: (cardStacks, moveCardThunk) => {
       const deck = cardStacks["a"].cards;
       const indices = Array.from(Array(52)).map((_, index) => index);
       const shuffledDeck = Array.from(Array(52));
@@ -58,7 +58,7 @@ export const SetupFunction: Story = {
 
       let toStack = "a";
       shuffledDeck.forEach((card) => {
-        moveCard({ card, toStack });
+        moveCardThunk({ cards: [card], toStack });
         switch (toStack) {
           case "a":
             toStack = "b";

@@ -204,7 +204,7 @@ export const Emscell: Story = {
 
       let toStack = 1;
       shuffledDeck.forEach((card) => {
-        moveCardThunk({ card, toStack: `col${toStack}` });
+        moveCardThunk({ cards: [card], toStack: `col${toStack}` });
         toStack++;
 
         if (toStack > 8) {
@@ -215,21 +215,6 @@ export const Emscell: Story = {
     isWin,
     compareMoveStacks,
     onMove: (cards, cardStacks, move, moveCardThunk, setSlide) => {
-      const fromStackCards = cardStacks[move.fromStack].cards;
-
-      if (move.fromIndex < fromStackCards.length) {
-        // Wasn't moved from top of stack, so moving a sequence. Now move the next card in the sequence.
-        setSlide({
-          animating: true,
-          slidingCard: fromStackCards[move.fromIndex],
-          slidingToStack: cardStacks[move.toStack],
-          slideType: "fast",
-          onSlideStart: () => moveCardThunk({ card: fromStackCards[move.fromIndex], toStack: move.toStack })
-        });
-
-        return true;
-      }
-
       const playStacks = Object.values(cardStacks).filter((stack) => !stack.name.startsWith("suit"));
       const suitStacks = Object.values(cardStacks).filter((stack) => stack.name.startsWith("suit"));
 
@@ -285,26 +270,16 @@ export const Emscell: Story = {
       if (cardToMove && destinationStack) {
         setSlide({
           animating: true,
-          slidingCard: cardToMove.id,
+          slidingCards: [cardToMove.id],
           slidingToStack: destinationStack,
           slideType: "fast",
-          onSlideStart: () => moveCardThunk({ card: cardToMove!.id, toStack: destinationStack!.name })
+          onSlideStart: () => moveCardThunk({ cards: [cardToMove!.id], toStack: destinationStack!.name })
         });
 
         return true;
       }
 
       return false;
-    },
-    onUndo: (_, history, undoThunk) => {
-      setTimeout(() => {
-        const lastMove = history.length && history[history.length - 1];
-
-        if (lastMove && !lastMove.fromTop) {
-          // The last move was part of a sequence, so we need to undo that too.
-          undoThunk();
-        }
-      }, MOVE_TIMEOUT);
     }
   }
 };

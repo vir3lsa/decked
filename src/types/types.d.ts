@@ -33,13 +33,8 @@ interface CardStacks {
 }
 
 interface MoveCardThunkPayload {
-  card: string;
+  cards: string[];
   toStack: string;
-}
-
-interface MoveCardPayload {
-  card: string;
-  move: Move;
 }
 
 type IsWin = (cardStacks: CardStacks) => boolean;
@@ -70,15 +65,15 @@ type SlideType = "fast" | "slow";
 
 interface SlidePayload {
   animating: boolean;
-  slidingCard?: string;
+  slidingCards: string[];
   slidingToStack?: IStack;
   slideType?: SlideType;
   onSlideStart?: VoidCallback;
   onSlideEnd?: VoidCallback;
 }
 
-interface AddCardToStackPayload {
-  card: string;
+interface AddCardsToStackPayload {
+  cards: string[];
   stackName: string;
 }
 

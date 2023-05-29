@@ -92,8 +92,6 @@ const Card: FunctionComponent<Props> = ({ id, top, stack, canDrag }) => {
     }
   });
 
-  // console.log(`${rank} of ${suit} rendering`);
-
   return (
     <div style={boxStyle} className={`nudgeBox ${ableToDrag() ? "draggable" : ""}`} ref={dragRef} onClick={handleClick}>
       <div style={style} className="card" role="img" ref={animationRef} />

@@ -67,7 +67,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
   const [, dropRef] = useDrop(
     () => ({
       accept: ItemTypes.CARD,
-      drop: (card) => moveCardThunk({ card: (card as ICard).id, toStack: name }),
+      drop: (card) => moveCardThunk({ cards: [(card as ICard).id], toStack: name }),
       canDrop: (card) => {
         return canDrop ? canDropFunc(cards, cardStacks, name, card as ICard) : true;
       }

@@ -5,7 +5,7 @@ import { useStoreState } from "../model";
 import "./AnimationLayer.css";
 
 const AnimationLayer: FunctionComponent = () => {
-  const slidingCard = useStoreState((state) => state.slidingCardObj);
+  const slidingCards = useStoreState((state) => state.slidingCardObjs);
   const slidingToStack = useStoreState((state) => state.slidingToStack);
   const slideType = useStoreState((state) => state.slideType);
   const onSlideStart = useStoreState((state) => state.onSlideStart);
@@ -21,34 +21,36 @@ const AnimationLayer: FunctionComponent = () => {
 
   useEffect(() => {
     setStyle(
-      slidingCard
+      slidingCards.length
         ? {
             transition: `transform ${slideTime}ms ease`,
-            left: `${slidingCard.position?.x || 0}px`,
-            top: `${slidingCard.position?.y || 0}px`,
+            left: `${slidingCards[0].position?.x || 0}px`,
+            top: `${slidingCards[0].position?.y || 0}px`,
             transform: "translate(0, 0)"
           }
         : {}
     );
+
     setTrigger(!trigger);
-  }, [slidingCard?.id]);
+  }, [slidingCards.reduce((acc, card) => acc + card.id, "")]);
 
   useEffect(() => {
-    if (slidingCard) {
+    if (slidingCards.length) {
       if (slidingToStack && toCards) {
-        x = slidingToStack.position.x - (slidingCard.position?.x || 0);
+        x = slidingToStack.position.x - (slidingCards[0].position?.x || 0);
         y =
           slidingToStack.position.y +
           (slidingToStack.spread ? toCards.length * SPREAD_FACTOR : 0) -
-          (slidingCard.position?.y || 0);
+          (slidingCards[0].position?.y || 0);
       }
 
       setStyle({
         transition: `transform ${slideTime}ms ease`,
-        left: `${slidingCard.position?.x || 0}px`,
-        top: `${slidingCard.position?.y || 0}px`,
+        left: `${slidingCards[0].position?.x || 0}px`,
+        top: `${slidingCards[0].position?.y || 0}px`,
         transform: `translate(${x}px, ${y}px)`
       });
+
       onSlideStart?.();
     }
   }, [trigger]);
@@ -64,9 +66,9 @@ const AnimationLayer: FunctionComponent = () => {
 
   return (
     <div className="animationLayerStyles">
-      {slidingCard && (
+      {slidingCards.length && (
         <div style={style} className="animation" ref={ref} onTransitionEnd={handleTransitionEnd}>
-          <DragPreview cards={[slidingCard]} />
+          <DragPreview cards={slidingCards} />
         </div>
       )}
     </div>
