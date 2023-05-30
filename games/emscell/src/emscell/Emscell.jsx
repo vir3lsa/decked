@@ -34,7 +34,7 @@ const setup = (cardStacks, moveCardThunk) => {
 
   let toStack = 1;
   shuffledDeck.forEach((card) => {
-    moveCardThunk({ card, toStack: `col${toStack}` });
+    moveCardThunk({ cards: [card], toStack: `col${toStack}` });
     toStack++;
 
     if (toStack > 8) {
@@ -196,9 +196,13 @@ const onMove = (cards, cardStacks, move, moveCardThunk, setSlide) => {
       slidingCards: [cardToMove.id],
       slidingToStack: destinationStack,
       slideType: "fast",
-      onSlideStart: () => moveCardThunk({ card: cardToMove.id, toStack: destinationStack.name })
+      onSlideStart: () => moveCardThunk({ cards: [cardToMove.id], toStack: destinationStack.name })
     });
+
+    return true;
   }
+
+  return false;
 };
 
 const preferredMoveStacks = [

@@ -66,11 +66,11 @@ const AnimationLayer: FunctionComponent = () => {
 
   return (
     <div className="animationLayerStyles">
-      {slidingCards.length && (
+      {slidingCards.length ? (
         <div style={style} className="animation" ref={ref} onTransitionEnd={handleTransitionEnd}>
           <DragPreview cards={slidingCards} />
         </div>
-      )}
+      ) : undefined}
     </div>
   );
 };

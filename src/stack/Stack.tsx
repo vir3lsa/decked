@@ -1,6 +1,6 @@
 import React, { CSSProperties, FunctionComponent, useEffect, useMemo, useRef } from "react";
 import { v4 as uuid4 } from "uuid";
-import { useStoreActions, useStoreState } from "../model";
+import { findStack, useStoreActions, useStoreState } from "../model";
 import Card from "../card";
 import { useDrop } from "react-dnd";
 import ItemTypes from "../dnd";
@@ -67,7 +67,11 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
   const [, dropRef] = useDrop(
     () => ({
       accept: ItemTypes.CARD,
-      drop: (card) => moveCardThunk({ cards: [(card as ICard).id], toStack: name }),
+      drop: (card) => {
+        const [stack, index] = findStack(cardStacks, (card as ICard).id);
+        const cards = stack.cards.slice(index); // Cards to top of stack.
+        moveCardThunk({ cards, toStack: name });
+      },
       canDrop: (card) => {
         return canDrop ? canDropFunc(cards, cardStacks, name, card as ICard) : true;
       }

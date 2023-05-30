@@ -2,6 +2,7 @@
 
 # Unreleased
 
+* 2023-05-30 Card move animations fully working.
 * 2023-05-16 Refactor cards model.
 * 2023-05-14 Added some card slide animations.
 

@@ -274,7 +274,7 @@ export const store = createStore<StoreModel>({
 
     card.isDragging = dragging;
 
-    // Set dragging on any cards on top TODO is this working?
+    // Set dragging on any cards on top
     if (state.dragMultiple) {
       const cards = state.cardStacks[stack].cards;
       cards
