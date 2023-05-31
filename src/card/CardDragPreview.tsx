@@ -22,6 +22,7 @@ const CardDragPreview: FunctionComponent<Props> = memo(({ suit, rank, top }) => 
       ...cardStyle,
       backgroundImage: `url(${deckImage})`,
       backgroundPosition: `${positionMap[suit][rank].x}px ${positionMap[suit][rank].y}px`,
+      backgroundSize: `${positionMap[suit][rank].size || 1480}px auto`,
       top
     });
   }, [suit, rank]);

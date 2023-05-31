@@ -2,7 +2,6 @@
     width: 128px;
     height: 180px;
     border-radius: 16px;
-    background-size: 1480px auto;
     filter: drop-shadow(-2px -2px 5px #999);
     transition: filter 0.5s ease;
 }

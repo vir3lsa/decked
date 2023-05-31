@@ -87,3 +87,20 @@ interface AddStackPayload {
   stack: IStack;
   cards?: ICard[];
 }
+
+interface ImagePosition {
+  x: number;
+  y: number;
+  size?: number;
+}
+
+interface SuitMap {
+  [rank: number]: ImagePosition;
+}
+
+interface PositionMap {
+  hearts: SuitMap;
+  spades: SuitMap;
+  diamonds: SuitMap;
+  clubs: SuitMap;
+}

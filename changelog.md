@@ -1,6 +1,10 @@
 # Decked Change Log
 
-# Unreleased
+# 0.1.8
+
+* Fixed slight green borders on some cards.
+
+# 0.1.7
 
 * 2023-05-30 Card move animations fully working.
 * 2023-05-16 Refactor cards model.

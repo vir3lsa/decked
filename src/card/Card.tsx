@@ -77,6 +77,7 @@ const Card: FunctionComponent<Props> = ({ id, top, stack, canDrag }) => {
       ...cardStyle,
       backgroundImage: `url(${deckImage})`,
       backgroundPosition: `${positionMap[suit][rank].x}px ${positionMap[suit][rank].y}px`,
+      backgroundSize: `${positionMap[suit][rank].size || 1480}px auto`,
       opacity: isDragging || stackDragging ? 0 : 1
     });
   }, [suit, rank, isDragging, stackDragging]);
