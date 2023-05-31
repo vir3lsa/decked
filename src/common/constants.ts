@@ -1,6 +1,6 @@
 export const SPREAD_FACTOR = 45;
-export const SLIDE_MILLIS = 500;
-export const SLIDE_FAST_MILLIS = 200;
+export const SLIDE_MILLIS = 200;
+export const SLIDE_FAST_MILLIS = 100;
 export const ON_MOVE_DELAY_MILLIS = 25;
 
 export const mainCongratulations = [
