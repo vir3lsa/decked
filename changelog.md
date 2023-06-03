@@ -1,5 +1,9 @@
 # Decked Change Log
 
+# 0.1.9
+
+* Improved free cell styling.
+
 # 0.1.8
 
 * Fixed slight green borders on some cards.

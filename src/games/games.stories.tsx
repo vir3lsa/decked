@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
+import "./games.css";
 
 import Playmat from "../playmat";
 import Stack from "../stack";
@@ -12,29 +13,6 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-const topRowStyle = {
-  display: "flex"
-};
-
-const bottomRowStyle = {
-  display: "grid",
-  gridTemplateColumns: "150px 150px 150px 150px 150px 150px 150px 150px",
-  gridTemplateRows: "250px"
-};
-
-const spacesStyle = {
-  display: "grid",
-  gridTemplateColumns: "150px 150px 150px 150px",
-  gridTemplateRows: "250px"
-};
-
-const suitsStyle = {
-  display: "grid",
-  gridTemplateColumns: "150px 150px 150px 150px",
-  gridTemplateRows: "250px",
-  marginLeft: "50px"
-};
 
 const MOVE_TIMEOUT = 50;
 
@@ -165,21 +143,21 @@ export const Emscell: Story = {
   args: {
     children: (
       <>
-        <div style={topRowStyle}>
-          <span style={spacesStyle}>
+        <div className="topRow">
+          <span className="spaces">
             <Stack name="spaceA" canDrag={canDrag} canDrop={canDropOnSpace} initialContents="fullDeck" />
             <Stack name="spaceB" canDrag={canDrag} canDrop={canDropOnSpace} />
             <Stack name="spaceC" canDrag={canDrag} canDrop={canDropOnSpace} />
             <Stack name="spaceD" canDrag={canDrag} canDrop={canDropOnSpace} />
           </span>
-          <span style={suitsStyle}>
+          <span className="suits">
             <Stack name="suit1" canDrag={() => false} canDrop={canDropOnSuit} />
             <Stack name="suit2" canDrag={() => false} canDrop={canDropOnSuit} />
             <Stack name="suit3" canDrag={() => false} canDrop={canDropOnSuit} />
             <Stack name="suit4" canDrag={() => false} canDrop={canDropOnSuit} />
           </span>
         </div>
-        <div style={bottomRowStyle}>
+        <div className="bottomRow">
           <Stack name="col1" spread canDrag={canDrag} canDrop={canDropOnSpread} />
           <Stack name="col2" spread canDrag={canDrag} canDrop={canDropOnSpread} />
           <Stack name="col3" spread canDrag={canDrag} canDrop={canDropOnSpread} />

@@ -82,6 +82,7 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
   return (
     <div ref={animationRef}>
       <div className="stack" ref={dropRef}>
+        <div className="empty" />
         {cardsInStack?.length && spread ? (
           cardsInStack.map((card, index) => (
             <Card
@@ -97,12 +98,11 @@ const Stack: FunctionComponent<Props> = ({ name, initialContents, spread = false
         ) : topCard ? (
           <Card
             id={topCard}
+            top="0px"
             stack={name}
             canDrag={(card) => (canDrag ? canDragFunc(cards, cardStacks, name, card) : true)}
           />
-        ) : (
-          <div className="empty" />
-        )}
+        ) : undefined}
       </div>
     </div>
   );
